@@ -1,0 +1,92 @@
+{
+  "schema": "proof_bundle_v1",
+  "generated_at": "2026-03-05T04:49:34Z",
+  "engine_version": "1.0.0",
+  "contract_version": "1.0.0",
+  "merkle_algorithm": "merkle_v1",
+  "tenant_id": "tenant_test",
+  "repo_full_name": "tenant/test-repo",
+  "root_date": "2026-03-04",
+  "merkle_root": "011c3a6fbb0185e583b4af7716d3d2fdfede450f863d084634e92c935404804c",
+  "receipt_count": 3,
+  "anchor": {
+    "schema": "anchor_v1",
+    "tenant_id": "tenant_test",
+    "repo_full_name": "tenant/test-repo",
+    "date": "2026-03-04",
+    "merkle_root": "011c3a6fbb0185e583b4af7716d3d2fdfede450f863d084634e92c935404804c",
+    "merkle_algorithm": "merkle_v1",
+    "receipt_count": 3,
+    "status": "pending",
+    "anchored_at": null,
+    "promoted_at": null,
+    "payload_hash": "4eb732b32cc3cd77eab9014498004f55b296d275c4bc4e93207b1be015e4f3d7"
+  },
+  "receipts": [
+    {
+      "receipt_id": "tv1-genesis",
+      "receipt_hash": "3eb7dca0f76922b9b5da7af6161ae5f34caa04cfc9e99816b13ec0692c4c2387",
+      "leaf_string": "v1|tenant_test|2026-03-04|tv1-genesis|3eb7dca0f76922b9b5da7af6161ae5f34caa04cfc9e99816b13ec0692c4c2387",
+      "leaf_hash": "175a2fd90312b03f7980375d7f8b479fc700fd90c1a8c5d2c5ca9e58e7d12df7",
+      "merkle_proof": [
+        {
+          "sibling": "cf72cc3b469630fe8bd1d871d5026063595676dbb4504363676ceff44b12cac0",
+          "position": "right"
+        },
+        {
+          "sibling": "9dacb68a6875f96cf026595bdcbd131643c67868e16ac4562af156abca667e9c",
+          "position": "right"
+        }
+      ],
+      "verdict": "PASS",
+      "composite_score": 0.88,
+      "evaluated_at": "2026-03-04T10:00:00Z"
+    },
+    {
+      "receipt_id": "tv2-chained",
+      "receipt_hash": "4e6cfcec2b7e530b9289dd51c654557680ae2f0aaaea660302b5a7799cf0aad9",
+      "leaf_string": "v1|tenant_test|2026-03-04|tv2-chained|4e6cfcec2b7e530b9289dd51c654557680ae2f0aaaea660302b5a7799cf0aad9",
+      "leaf_hash": "cf72cc3b469630fe8bd1d871d5026063595676dbb4504363676ceff44b12cac0",
+      "merkle_proof": [
+        {
+          "sibling": "175a2fd90312b03f7980375d7f8b479fc700fd90c1a8c5d2c5ca9e58e7d12df7",
+          "position": "left"
+        },
+        {
+          "sibling": "9dacb68a6875f96cf026595bdcbd131643c67868e16ac4562af156abca667e9c",
+          "position": "right"
+        }
+      ],
+      "verdict": "WARN",
+      "composite_score": 0.5,
+      "evaluated_at": "2026-03-04T11:00:00Z"
+    },
+    {
+      "receipt_id": "tv3-chained",
+      "receipt_hash": "a7b4e937aa8b31586f38265f8e6e3c90b7d7c7b7214c6cd8483c60d4726daddd",
+      "leaf_string": "v1|tenant_test|2026-03-04|tv3-chained|a7b4e937aa8b31586f38265f8e6e3c90b7d7c7b7214c6cd8483c60d4726daddd",
+      "leaf_hash": "8b3a737e94d48a72dc79e85215242ab5016b8f824bac336d3b570bc85a427c09",
+      "merkle_proof": [
+        {
+          "sibling": "8b3a737e94d48a72dc79e85215242ab5016b8f824bac336d3b570bc85a427c09",
+          "position": "right"
+        },
+        {
+          "sibling": "5d7555cfce6dda0e0ab3b7985548c4469e41a6e6d5d0a0b069bb067450d1b9e5",
+          "position": "left"
+        }
+      ],
+      "verdict": "PASS",
+      "composite_score": 0.88,
+      "evaluated_at": "2026-03-04T12:00:00Z"
+    }
+  ],
+  "verification_instructions": {
+    "step1": "Verify each receipt signature using titan_verify.py",
+    "step2": "Recompute leaf hash: SHA256('L|' + leaf_string)",
+    "step3": "Walk merkle_proof to recompute root",
+    "step4": "Compare computed root with merkle_root field",
+    "step5": "Compare merkle_root with anchor.merkle_root"
+  },
+  "bundle_hash": "1e665dfeb1fde5d649e138616fa4f29f15f1e1fc9d64dc5580b2016b82cd030b"
+}
