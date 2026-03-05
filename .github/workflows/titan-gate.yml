@@ -1,0 +1,46 @@
+name: Titan Gate Evaluation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  evaluate:
+    name: Cryptographic Change Evaluation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Titan Gate evaluation
+        env:
+          TITAN_SIGNING_KEY: ${{ secrets.TITAN_SIGNING_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/ci_evaluate.py \
+            --tenant "${{ github.repository_owner }}" \
+            --repo "${{ github.repository }}" \
+            --pr "${{ github.event.pull_request.number }}" \
+            --title "${{ github.event.pull_request.title }}" \
+            --branch "${{ github.head_ref }}" \
+            --base "${{ github.base_ref }}" \
+            --sha "${{ github.event.pull_request.head.sha }}"
+
+      - name: Upload receipt artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: titan-gate-receipt
+          path: receipt.json
+          retention-days: 90
