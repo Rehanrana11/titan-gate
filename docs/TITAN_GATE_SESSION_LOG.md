@@ -54,3 +54,33 @@
 
 ***4. Then: WO-12 examples/ directory, WO-14 README overhaul, WO-15 Show HN***
 
+***## Session: 2026-03-06 (Receipt Chaining + Spec + Examples + README)***
+
+***\*\*Commits:\*\* de103ff, 3e6ecbd, 158a9b5, 67087fe, edb4b3f***
+
+***\*\*What was done:\*\****
+
+***- WO-11: ci\_evaluate.py receipts now chain to .titan/receipts/{date}/{id}.json***
+
+***- WO-12: examples/ directory with sample-repo integration***
+
+***- WO-14: README fully overhauled — replaced Hireinstein with Titan Gate***
+
+***- WO-17: TITAN\_SIGNING\_KEY secret confirmed in GitHub***
+
+***- docs/SPEC.md written and committed***
+
+***- receipt.json removed from repo root and git history***
+
+***- End-to-end verified: generate → chain → verify → PASS***
+
+***- 555 tests green throughout***
+
+
+
+***## Next Session: WO-15 (Show HN Post)***
+
+***Product is launch-ready. Write and submit Show HN post.***
+
+***Title: "Show HN: Titan Gate — cryptographic receipts for AI-assisted code changes"***
+
