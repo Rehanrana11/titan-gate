@@ -1,156 +1,199 @@
-# Hireinstein
+# Titan Gate
 
-AI Visibility Tracker. See how GPT, Claude, Gemini, and Grok rank your brand.
+Cryptographic change control for AI-assisted software engineering.
 
-## Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Set up environment
-cp .env.example .env.local
-# Edit .env.local with your API keys
-
-# Start development
-npm run dev
-```
-
-The web app runs at `http://localhost:3000` and the API at `http://localhost:3001`.
-
-## Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `OPENAI_API_KEY` | Yes | OpenAI API key for GPT ranking |
-| `ANTHROPIC_API_KEY` | Yes | Anthropic API key for Claude ranking |
-| `GOOGLE_API_KEY` | No | Google AI API key for Gemini ranking |
-| `XAI_API_KEY` | No | xAI API key for Grok ranking |
-| `REDIS_URL` | Yes | Redis connection for session storage |
-| `STRIPE_SECRET_KEY` | Yes | Stripe secret key for billing |
-| `STRIPE_PUBLISHABLE_KEY` | Yes | Stripe publishable key |
-| `STRIPE_WEBHOOK_SECRET` | Yes | Stripe webhook signing secret |
-| `NEXT_PUBLIC_API_URL` | Yes | API URL (default: `http://localhost:3001`) |
-| `MOCK_AI` | No | Set to `true` to use mock AI responses |
-| `MOCK_SCENARIO` | No | Mock scenario preset (see below) |
-
-## Mock Mode
-
-For development without API keys, enable mock mode:
-
-```
-MOCK_AI=true
-MOCK_SCENARIO=realistic
-```
-
-Available scenarios:
-
-| Scenario | Behavior |
-|---|---|
-| `realistic` | Mixed outcomes with configurable success rates per model |
-| `allSuccess` | All 4 models return successful responses |
-| `partialFailure` | 2 models succeed, 2 return 5xx errors |
-| `allServerError` | All models return 5xx errors |
-| `rateLimited` | First model returns 429, remaining calls abort |
-| `allTimeout` | All models exceed 8s timeout |
-
-## Project Structure
-
-```
-hireinstein/
-  apps/
-    web/                    # Next.js frontend
-      app/                  # Pages (login, signup, dashboard, privacy)
-      components/           # UI components
-        home/               # Homepage sections
-        layout/             # Navbar, Footer
-        ui/                 # Button, Card, Icons
-      hooks/                # useSnapshot custom hook
-      e2e/                  # Playwright E2E tests
-    api/                    # Express backend
-      src/
-        lib/                # mockAI service
-        middleware/          # Auth middleware
-        routes/             # API routes (auth, ranking, billing)
-        services/           # Business logic (auth, ranking, stripe)
-  docs/
-    api.yaml                # OpenAPI 3.0 spec
-    scoring-methodology.md  # Public scoring formula
-  scripts/
-    doctor/                 # Build health checks
-```
-
-## API
-
-The ranking API accepts a domain and query, then queries up to 4 AI models in parallel.
-
-```
-POST /api/v1/rank
-POST /api/v1/snapshot
-```
-
-Request:
+Every code change evaluated by Titan Gate produces a **signed, chained, verifiable receipt** — proof that the change was reviewed, scored, and not tampered with.
 ```json
 {
-  "domain": "stripe.com",
-  "query": "best payment processor"
+  "receipt_id": "3ae452f4-3a75-44fb-899f-cef8f0fd79b0",
+  "tenant_id": "Rehanrana11",
+  "verdict": "PASS",
+  "composite_score": 0.88,
+  "prev_receipt_hash": "GENESIS",
+  "receipt_hash": "de103ff...",
+  "signature": "7969d20...",
+  "VERIFICATION": "PASS"
 }
 ```
 
-Response:
-```json
-{
-  "domain": "stripe.com",
-  "query": "best payment processor",
-  "aiVisibilityScore": 72,
-  "confidenceInterval": { "low": 65, "high": 79, "level": "high" },
-  "rankings": [...],
-  "totalResponseTimeMs": 2340
-}
+---
+
+## Why Titan Gate
+
+AI writes code fast. SOC2 auditors ask: *how do you know what changed, who approved it, and that the record wasn't altered?*
+
+Titan Gate answers that question with cryptographic receipts — not process docs.
+
+- **Deterministic** — same input always produces same receipt hash
+- **Chained** — each receipt links to the previous via `prev_receipt_hash`
+- **Tamper-evident** — HMAC-SHA256 signature detects any modification
+- **Auditable** — receipts travel with the repo at `.titan/receipts/`
+- **SOC2-aligned** — maps directly to CC6, CC7, CC8 controls
+
+---
+
+## Quickstart (2 minutes)
+
+### 1. Add the secret
+```
+GitHub repo → Settings → Secrets → Actions → New secret
+Name:  TITAN_SIGNING_KEY
+Value: <output of: python -c "import secrets; print(secrets.token_hex(32))">
 ```
 
-Full API documentation: `docs/api.yaml`
+### 2. Add the workflow
 
-## Scoring Methodology
+Create `.github/workflows/titan-gate.yml`:
+```yaml
+name: Titan Gate
 
-Visibility scores are calculated using position, sentiment, and model weight factors. The formula is fully disclosed in `docs/scoring-methodology.md`.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
-Key differentiator: every score includes a confidence interval showing the precision of the measurement.
+jobs:
+  evaluate:
+    name: Cryptographic Change Evaluation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-## Testing
+      - uses: Rehanrana11/titan-gate@v1.0.0
+        with:
+          signing-key: ${{ secrets.TITAN_SIGNING_KEY }}
+```
 
+### 3. Open a PR
+
+Every PR now gets a cryptographic receipt stored at:
+```
+.titan/receipts/{date}/{receipt_id}.json
+```
+
+---
+
+## Verify a Receipt
+
+Any party with the signing key can independently verify a receipt:
 ```bash
-# Unit tests (Vitest)
-cd apps/web && npm test
-
-# E2E tests (Playwright)
-cd apps/web && npx playwright test
-
-# Build health check
-cd apps/web && npm run doctor:local
+python scripts/titan_verify.py .titan/receipts/2026-03-06/<receipt_id>.json \
+  --key <your-signing-key>
 ```
 
-## Deployment
+Output:
+```
+============================================================
+TITAN GATE RECEIPT VERIFICATION
+============================================================
+Receipt ID   : 3ae452f4-3a75-44fb-899f-cef8f0fd79b0
+Tenant       : Rehanrana11
+Verdict      : PASS
+Score        : 0.88
+------------------------------------------------------------
+VERIFICATION  : PASS
+Signature     : VALID
+Hash          : VALID
+============================================================
+```
 
-1. Set all required environment variables
-2. Set `MOCK_AI=false` for production
-3. Run database migrations: `npx prisma migrate deploy`
-4. Build: `npm run build`
-5. Start: `npm start`
+---
 
-The `robots.txt` in `apps/web/public/` blocks AI training crawlers (GPTBot, Google-Extended, OAI-Searchbot, ClaudeBot, PerplexityBot, CCBot) while allowing standard search engines.
+## How It Works
+```
+PR opened
+  → Three-judge engine evaluates (structural + semantic + policy)
+  → Composite score computed
+  → Verdict: PASS / WARN / FAIL
+  → Receipt signed with HMAC-SHA256
+  → Receipt chained via prev_receipt_hash
+  → Receipt stored at .titan/receipts/{date}/{receipt_id}.json
+  → Daily Merkle root sealed
+  → Receipt verifiable by anyone with the key
+```
 
-## Architecture Decisions
+### Scoring
+```
+composite_score = weighted(structural_score, semantic_score)
 
-- **Promise.allSettled** for parallel AI calls (never rejects, collects all results)
-- **AbortController** with 8s server-side timeout matching frontend
-- **429 detection** aborts remaining model calls immediately
-- **Mock AI system** with 6 scenario presets for development
-- **CSS custom properties** for all colors, spacing, typography (zero raw hex)
-- **next/dynamic** for below-fold code splitting
-- **Satoshi** local font with preload, Google Fonts with display=swap
+PASS  >= 0.70
+WARN  >= 0.40
+FAIL  <  0.40
+```
+
+Hard violations force FAIL regardless of score.
+
+---
+
+## SOC2 Controls
+
+| Control | Coverage |
+|---------|----------|
+| CC6.1 | Logical access — tenant isolation on all queries |
+| CC6.7 | Change management — signed receipt on every PR |
+| CC7.1 | Anomaly detection — tamper detection raises structured anomalies |
+| CC7.2 | Monitoring — evaluation manifest records all version constants |
+| CC8.1 | Change control — PASS/WARN/FAIL gate on every PR |
+
+---
+
+## Architecture
+
+Five cryptographic layers:
+
+1. **Three-Judge Engine** — structural, semantic, policy judges
+2. **Receipt Chain** — HMAC-SHA256, canonical JSON, `prev_receipt_hash`
+3. **Merkle Ledger** — `merkle_v1`, daily root sealing, immutable
+4. **Replay Engine** — byte-identical replay, zero tolerance for drift
+5. **Anchor Notarization** — daily Merkle roots anchored to GitHub
+
+---
+
+## Test Suite
+```bash
+python run_tests.py
+```
+```
+Ran 555 tests in 8.3s — OK
+```
+
+555 tests across 11 files. Zero regressions policy.
+
+---
+
+## Codebase
+```
+judge_engine/v1/     Three-judge deterministic evaluation engine
+api/                 Receipts, replay, Merkle, anchoring, key management
+scripts/             titan_verify.py, ci_evaluate.py, seal_daily_root.py
+tests/               555 tests + test vectors TV1/TV2/TV3
+examples/            Sample repo integration
+docs/                SPEC.md, architecture, auditor docs
+deploy/              Dockerfile + docker-compose
+action.yml           GitHub Action — installable as uses: Rehanrana11/titan-gate@v1.0.0
+```
+
+---
+
+## Docs
+
+- [Public Verification Spec](docs/SPEC.md)
+- [Architecture Decisions](docs/ARCHITECTURE_DECISIONS.md)
+- [Session Log](docs/TITAN_GATE_SESSION_LOG.md)
+- [Example Integration](examples/sample-repo/)
+
+---
+
+## Version
+```
+ENGINE_VERSION          1.0.0
+MERKLE_ALGORITHM        merkle_v1
+SIGNING_VERSION         hmac-sha256-v1
+```
+
+---
 
 ## License
 
-Proprietary. All rights reserved.
+Apache 2.0
