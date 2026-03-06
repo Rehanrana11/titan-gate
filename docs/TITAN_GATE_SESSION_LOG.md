@@ -84,3 +84,11 @@
 
 ***Title: "Show HN: Titan Gate — cryptographic receipts for AI-assisted code changes"***
 
+***## WO-15: Show HN — DONE***
+
+***Posted: 2026-03-05 9:11 PM***
+
+***URL: https://news.ycombinator.com/item?id=47269933***
+
+***Repo made public: 2026-03-05 9:15 PM***
+
