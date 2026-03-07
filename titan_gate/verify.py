@@ -17,7 +17,8 @@ import sys
 __version__ = "1.0.0"
 __spec__ = "TRS-1 v1.0.0"
 
-EXCLUSION_FIELDS = {"signature", "prev_receipt_hash_verified", "_debug", "_meta"}
+EXCLUSION_FIELDS = {"signature", "receipt_hash", "prev_receipt_hash_verified", "_debug", "_meta"}
+
 
 REQUIRED_FIELDS = [
     "schema_version", "receipt_id", "tenant_id", "repo", "repo_full_name",

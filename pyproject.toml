@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "titan-gate"
-version = "1.0.0"
+version = "1.0.1"
 description = "Cryptographic receipt verification for AI-assisted code changes"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -22,6 +22,8 @@ dependencies = []
 
 [project.scripts]
 titan-verify = "titan_gate.verify:main"
+titan-gate = "titan_gate.verify:main"
+
 
 [project.urls]
 Homepage = "https://github.com/Rehanrana11/titan-gate"
