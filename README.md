@@ -1,8 +1,9 @@
-﻿# Titan Gate
+# Titan Gate
 
 Cryptographic change control for AI-assisted software engineering.
 
-Every code change evaluated by Titan Gate produces a **signed, chained, verifiable receipt** â€” proof that the change was reviewed, scored, and not tampered with.
+Every code change evaluated by Titan Gate produces a **signed, chained, verifiable receipt** -- proof that the change was reviewed, scored, and not tampered with.
+
 ```json
 {
   "receipt_id": "3ae452f4-3a75-44fb-899f-cef8f0fd79b0",
@@ -12,31 +13,57 @@ Every code change evaluated by Titan Gate produces a **signed, chained, verifiab
   "prev_receipt_hash": "GENESIS",
   "receipt_hash": "de103ff...",
   "signature": "7969d20...",
-  "VERIFICATION": "PASS"
+  "signing_version": "hmac-sha256-v1"
 }
+```
+
+---
+
+## Install
+
+**Python / CLI**
+```bash
+pip install titan-gate
+titan-verify receipt.json --key <hex>
+```
+
+**GitHub Actions**
+```yaml
+- uses: Rehanrana11/titan-gate/.github/actions/verify@main
+  with:
+    receipt: .titan/receipts/latest.json
+    key: ${{ secrets.TITAN_SIGNING_KEY }}
+```
+
+**R**
+```r
+install.packages('titangate', repos = NULL, type = 'source')
+library(titangate)
+verify_receipt('receipt.json', key_hex = Sys.getenv('TITAN_SIGNING_KEY'))
 ```
 
 ---
 
 ## Why Titan Gate
 
-AI writes code fast. SOC2 auditors ask: *how do you know what changed, who approved it, and that the record wasn't altered?*
+AI writes code fast. SOC2 auditors ask: *how do you know what changed, who approved it, and that the record was not altered?*
 
-Titan Gate answers that question with cryptographic receipts â€” not process docs.
+Titan Gate answers that question with cryptographic receipts -- not process docs.
 
-- **Deterministic** â€” same input always produces same receipt hash
-- **Chained** â€” each receipt links to the previous via `prev_receipt_hash`
-- **Tamper-evident** â€” HMAC-SHA256 signature detects any modification
-- **Auditable** â€” receipts travel with the repo at `.titan/receipts/`
-- **SOC2-aligned** â€” maps directly to CC6, CC7, CC8 controls
+- **Deterministic** -- same input always produces same receipt hash
+- **Chained** -- each receipt links to the previous via `prev_receipt_hash`
+- **Tamper-evident** -- HMAC-SHA256 signature detects any modification
+- **Auditable** -- receipts travel with the repo at `.titan/receipts/`
+- **SOC2-aligned** -- maps directly to CC6, CC7, CC8 controls
 
 ---
 
-## Quickstart (2 minutes)
+## Quickstart
 
 ### 1. Add the secret
+
 ```
-GitHub repo â†’ Settings â†’ Secrets â†’ Actions â†’ New secret
+GitHub repo -> Settings -> Secrets -> Actions -> New secret
 Name:  TITAN_SIGNING_KEY
 Value: <output of: python -c "import secrets; print(secrets.token_hex(32))">
 ```
@@ -44,97 +71,42 @@ Value: <output of: python -c "import secrets; print(secrets.token_hex(32))">
 ### 2. Add the workflow
 
 Create `.github/workflows/titan-gate.yml`:
+
 ```yaml
 name: Titan Gate
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+on: [pull_request]
 
 jobs:
   evaluate:
-    name: Cryptographic Change Evaluation
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: Rehanrana11/titan-gate@v1.0.0
-        with:
-          signing-key: ${{ secrets.TITAN_SIGNING_KEY }}
+      - name: Evaluate
+        run: python scripts/ci_evaluate.py
+        env:
+          TITAN_SIGNING_KEY: ${{ secrets.TITAN_SIGNING_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-### 3. Open a PR
+### 3. Verify a receipt
 
-Every PR now gets a cryptographic receipt stored at:
-```
-.titan/receipts/{date}/{receipt_id}.json
-```
-
----
-
-## Verify a Receipt
-
-Any party with the signing key can independently verify a receipt:
 ```bash
-python scripts/titan_verify.py .titan/receipts/2026-03-06/<receipt_id>.json \
-  --key <your-signing-key>
-```
-
-Output:
-```
-============================================================
-TITAN GATE RECEIPT VERIFICATION
-============================================================
-Receipt ID   : 3ae452f4-3a75-44fb-899f-cef8f0fd79b0
-Tenant       : Rehanrana11
-Verdict      : PASS
-Score        : 0.88
-------------------------------------------------------------
-VERIFICATION  : PASS
-Signature     : VALID
-Hash          : VALID
-============================================================
+titan-verify .titan/receipts/receipt.json --key $TITAN_SIGNING_KEY
 ```
 
 ---
 
-## How It Works
-```
-PR opened
-  â†’ Three-judge engine evaluates (structural + semantic + policy)
-  â†’ Composite score computed
-  â†’ Verdict: PASS / WARN / FAIL
-  â†’ Receipt signed with HMAC-SHA256
-  â†’ Receipt chained via prev_receipt_hash
-  â†’ Receipt stored at .titan/receipts/{date}/{receipt_id}.json
-  â†’ Daily Merkle root sealed
-  â†’ Receipt verifiable by anyone with the key
-```
-
-### Scoring
-```
-composite_score = weighted(structural_score, semantic_score)
-
-PASS  >= 0.70
-WARN  >= 0.40
-FAIL  <  0.40
-```
-
-Hard violations force FAIL regardless of score.
-
----
-
-## SOC2 Controls
+## SOC2 Coverage
 
 | Control | Coverage |
 |---------|----------|
-| CC6.1 | Logical access â€” tenant isolation on all queries |
-| CC6.7 | Change management â€” signed receipt on every PR |
-| CC7.1 | Anomaly detection â€” tamper detection raises structured anomalies |
-| CC7.2 | Monitoring â€” evaluation manifest records all version constants |
-| CC8.1 | Change control â€” PASS/WARN/FAIL gate on every PR |
+| CC6.1 | Logical access -- tenant isolation on all queries |
+| CC6.7 | Change management -- signed receipt on every PR |
+| CC7.1 | Anomaly detection -- tamper detection raises structured anomalies |
+| CC7.2 | Monitoring -- evaluation manifest records all version constants |
+| CC8.1 | Change control -- PASS/WARN/FAIL gate on every PR |
 
 ---
 
@@ -142,20 +114,35 @@ Hard violations force FAIL regardless of score.
 
 Five cryptographic layers:
 
-1. **Three-Judge Engine** â€” structural, semantic, policy judges
-2. **Receipt Chain** â€” HMAC-SHA256, canonical JSON, `prev_receipt_hash`
-3. **Merkle Ledger** â€” `merkle_v1`, daily root sealing, immutable
-4. **Replay Engine** â€” byte-identical replay, zero tolerance for drift
-5. **Anchor Notarization** â€” daily Merkle roots anchored to GitHub
+1. **Three-Judge Engine** -- structural, semantic, policy judges
+2. **Receipt Chain** -- HMAC-SHA256, canonical JSON, `prev_receipt_hash`
+3. **Merkle Ledger** -- `merkle_v1`, daily root sealing, immutable
+4. **Replay Engine** -- byte-identical replay, zero tolerance for drift
+5. **Anchor Notarization** -- daily Merkle roots anchored to GitHub
+
+---
+
+## Public Verification Spec
+
+The verification algorithm is open and language-neutral: [TRS-1 v1.0.0](docs/SPEC.md)
+
+Anyone can verify a Titan Gate receipt without contacting Titan Gate infrastructure:
+
+```bash
+pip install titan-gate
+titan-verify receipt.json --key <hex>
+```
 
 ---
 
 ## Test Suite
+
 ```bash
 python run_tests.py
 ```
+
 ```
-Ran 555 tests in 8.3s â€” OK
+Ran 555 tests -- OK
 ```
 
 555 tests across 11 files. Zero regressions policy.
@@ -163,15 +150,17 @@ Ran 555 tests in 8.3s â€” OK
 ---
 
 ## Codebase
+
 ```
 judge_engine/v1/     Three-judge deterministic evaluation engine
 api/                 Receipts, replay, Merkle, anchoring, key management
 scripts/             titan_verify.py, ci_evaluate.py, seal_daily_root.py
 tests/               555 tests + test vectors TV1/TV2/TV3
+r-package/titangate  R package -- wraps titan-verify CLI
 examples/            Sample repo integration
 docs/                SPEC.md, architecture, auditor docs
 deploy/              Dockerfile + docker-compose
-action.yml           GitHub Action â€” installable as uses: Rehanrana11/titan-gate@v1.0.0
+.github/actions/     Composite action for receipt verification
 ```
 
 ---
@@ -180,16 +169,16 @@ action.yml           GitHub Action â€” installable as uses: Rehanrana11/tit
 
 - [Public Verification Spec](docs/SPEC.md)
 - [Architecture Decisions](docs/ARCHITECTURE_DECISIONS.md)
-- [Session Log](docs/TITAN_GATE_SESSION_LOG.md)
 - [Example Integration](examples/sample-repo/)
 
 ---
 
 ## Version
+
 ```
-ENGINE_VERSION          1.0.0
-MERKLE_ALGORITHM        merkle_v1
-SIGNING_VERSION         hmac-sha256-v1
+ENGINE_VERSION     1.0.0
+MERKLE_ALGORITHM   merkle_v1
+SIGNING_VERSION    hmac-sha256-v1
 ```
 
 ---
@@ -197,4 +186,5 @@ SIGNING_VERSION         hmac-sha256-v1
 ## License
 
 Apache 2.0
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18891039.svg)](https://doi.org/10.5281/zenodo.18891039)
