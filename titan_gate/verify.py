@@ -2,6 +2,7 @@
 """
 Titan Gate Receipt Verifier
 TRS-1 (Titan Receipt Standard) v1.0.0 — plus ed25519-v1 signing (WO-1)
+and chain-walk verification (WO-2)
 
 HMAC path (signing_version: hmac-sha256-v1): Python standard library only,
 zero dependencies, behavior byte-identical to titan-verify 1.0.0.
@@ -12,22 +13,29 @@ legacy verifier.
 Usage:
     titan-verify <receipt.json> --key <hex_key>            # legacy TRS-1 / HMAC
     titan-verify <receipt.json> --pubkey <pubkey_file>     # ed25519-v1 (public key only)
+    titan-verify --chain <dir|file.jsonl> [--key ...] [--pubkey ...]
+        # chain-walk: claimed order = lexicographic *.json filenames (dir)
+        # or line order (.jsonl). Receipt 0 must have prev_receipt_hash ==
+        # "GENESIS"; every receipt[n].prev_receipt_hash must equal
+        # receipt[n-1].receipt_hash; every receipt is also individually
+        # verified (hash + signature, dispatched on its signing_version).
 """
 
 import argparse
 import hashlib
 import hmac
 import json
+import os
 import sys
 
-__version__ = "1.1.0"
-__spec__ = "TRS-1 v1.0.0 (+ ed25519-v1)"
+__version__ = "1.2.0"
+__spec__ = "TRS-1 v1.0.0 (+ ed25519-v1, chain-walk)"
 
 # NOTE (WO-3): api/receipt_signing.py defines an identical EXCLUSION_FIELDS and
-# canonical_bytes. Confirmed IDENTICAL as of this patch (the divergence logged
-# for WO-3 did not reproduce). Two definitions is still one too many — unify
-# into a single shared module in TRS-2 (WO-3). Do NOT edit one without the
-# other; the ed25519 branch below verifies bytes signed via the api copy.
+# canonical_bytes. Confirmed IDENTICAL as of the WO-1 patch (the divergence
+# logged for WO-3 lived in a stale Mar-6 local copy, not in main). Two
+# definitions is still one too many — unify into a single shared module in
+# TRS-2 (WO-3). Do NOT edit one without the other.
 EXCLUSION_FIELDS = {"signature", "receipt_hash", "prev_receipt_hash_verified", "_debug", "_meta"}
 
 
@@ -243,6 +251,183 @@ def _verify_ed25519(receipt, pubkey_path, fmt, quiet):
         return 1
 
 
+# ---------------------------------------------------------------------------
+# WO-2: chain-walk verification
+# ---------------------------------------------------------------------------
+
+def _check_receipt_silent(receipt, key_hex, ed25519_pub, invalid_signature_exc):
+    """Per-receipt verification for chain mode: (ok, err_code, message), no
+    printing. DELIBERATELY replicates (not refactors) the single-receipt
+    logic above — the legacy functions are golden-pinned byte-identical and
+    stay untouched. ed25519_pub is a pre-loaded Ed25519PublicKey or None."""
+    for field in REQUIRED_FIELDS:
+        if field not in receipt:
+            return False, "ERR_SCHEMA_INVALID", f"Missing required field: {field}"
+    if receipt.get("schema_version") != "receipt_v1":
+        return False, "ERR_SCHEMA_VERSION", "Unsupported schema version"
+
+    signing_version = receipt.get("signing_version")
+    canon = canonical_bytes(receipt)
+    computed_hash = hashlib.sha256(canon).hexdigest()
+    hash_valid = hmac.compare_digest(computed_hash, receipt.get("receipt_hash", ""))
+
+    if signing_version == "hmac-sha256-v1":
+        if key_hex is None:
+            return False, "ERR_KEY_REQUIRED", "hmac-sha256-v1 receipt requires --key"
+        try:
+            key_bytes = bytes.fromhex(key_hex)
+        except ValueError:
+            return False, "ERR_KEY_INVALID", "Key is not valid hex"
+        expected_sig = hmac.new(key_bytes, canon, hashlib.sha256).hexdigest()
+        sig_valid = hmac.compare_digest(expected_sig, receipt.get("signature", ""))
+    elif signing_version == "ed25519-v1":
+        if ed25519_pub is None:
+            return False, "ERR_PUBKEY_REQUIRED", "ed25519-v1 receipt requires --pubkey"
+        try:
+            signature = bytes.fromhex(receipt.get("signature", ""))
+            ed25519_pub.verify(signature, canon)
+            sig_valid = True
+        except (ValueError, invalid_signature_exc):
+            sig_valid = False
+    else:
+        return False, "ERR_SIGNING_VERSION_UNKNOWN", f"Unsupported signing version: {signing_version}"
+
+    if hash_valid and sig_valid:
+        return True, None, None
+    if not sig_valid:
+        return False, "ERR_SIG", "ANOMALY: SIGNATURE_MISMATCH"
+    return False, "ERR_HASH", "ANOMALY: HASH_MISMATCH"
+
+
+def _load_chain(chain_path):
+    """Returns list of (label, receipt) in claimed order.
+    Directory: lexicographically sorted *.json filenames.
+    File: JSONL, one receipt per line, line order."""
+    if os.path.isdir(chain_path):
+        entries = []
+        for fn in sorted(f for f in os.listdir(chain_path) if f.endswith(".json")):
+            with open(os.path.join(chain_path, fn), "r", encoding="utf-8") as f:
+                entries.append((fn, json.load(f)))
+        return entries
+    entries = []
+    with open(chain_path, "r", encoding="utf-8") as f:
+        for i, line in enumerate(f):
+            line = line.strip()
+            if line:
+                entries.append((f"line {i + 1}", json.loads(line)))
+    return entries
+
+
+def _chain_output(fmt, ok, receipts_checked, err_code=None, break_position=None,
+                  message=None, quiet=False):
+    if fmt == "json":
+        result = {
+            "ok": ok, "result": "VALID" if ok else "INVALID",
+            "receipts_checked": receipts_checked,
+            "err_code": err_code, "break_position": break_position,
+            "message": message,
+        }
+        if not quiet:
+            print(json.dumps(result, indent=2))
+        return
+    if quiet and ok:
+        return
+    print("=" * 60)
+    print("TITAN GATE CHAIN VERIFICATION")
+    print("=" * 60)
+    print(f"Receipts checked : {receipts_checked}")
+    if ok:
+        print("VERIFICATION     : PASS")
+        print("Chain            : CONTINUOUS FROM GENESIS")
+    else:
+        print("VERIFICATION     : FAIL")
+        if break_position is not None:
+            print(f"Break position   : {break_position}")
+        if message:
+            print(f"  {message}")
+    print("=" * 60)
+
+
+def _verify_chain(chain_path, key_hex, pubkey_path, fmt, quiet):
+    if key_hex is not None:
+        key_hex = key_hex.strip()
+        if key_hex != key_hex.lower():
+            _chain_output(fmt, False, 0, "ERR_HEX_CASE_INVALID", None,
+                          "Key must be lowercase hex", quiet)
+            return 2
+
+    ed25519_pub = None
+    invalid_signature_exc = ValueError  # placeholder; replaced when loaded
+    if pubkey_path is not None:
+        try:
+            from cryptography.exceptions import InvalidSignature
+            from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+        except ImportError:
+            _chain_output(fmt, False, 0, "ERR_DEPENDENCY_MISSING", None,
+                          "ed25519-v1 verification requires the 'cryptography' package: pip install cryptography",
+                          quiet)
+            return 2
+        try:
+            with open(pubkey_path, "r", encoding="utf-8") as f:
+                pub_hex = f.read().strip()
+            ed25519_pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(pub_hex))
+            invalid_signature_exc = InvalidSignature
+        except FileNotFoundError:
+            _chain_output(fmt, False, 0, "ERR_PUBKEY_NOT_FOUND", None,
+                          f"Public key file not found: {pubkey_path}", quiet)
+            return 2
+        except (ValueError, TypeError) as e:
+            _chain_output(fmt, False, 0, "ERR_PUBKEY_INVALID", None,
+                          f"Public key file is not a valid 32-byte hex Ed25519 key: {e}", quiet)
+            return 2
+
+    try:
+        entries = _load_chain(chain_path)
+    except FileNotFoundError:
+        _chain_output(fmt, False, 0, "ERR_CHAIN_PATH", None,
+                      f"Chain path not found: {chain_path}", quiet)
+        return 2
+    except json.JSONDecodeError as e:
+        _chain_output(fmt, False, 0, "ERR_JSON_INVALID", None,
+                      f"Invalid JSON in chain input: {e}", quiet)
+        return 2
+
+    if not entries:
+        _chain_output(fmt, False, 0, "ERR_CHAIN_EMPTY", None,
+                      f"No receipts found at: {chain_path}", quiet)
+        return 2
+
+    checked = 0
+    prev_expected = None
+    for idx, (label, receipt) in enumerate(entries):
+        prev = receipt.get("prev_receipt_hash", "")
+        if idx == 0:
+            if prev != "GENESIS":
+                _chain_output(fmt, False, checked, "ERR_CHAIN_GENESIS", 0,
+                              f"Receipt at position 0 ({label}) has prev_receipt_hash != GENESIS — "
+                              f"chain does not start at genesis (missing head?)", quiet)
+                return 1
+        else:
+            if prev != prev_expected:
+                _chain_output(fmt, False, checked, "ERR_CHAIN_BROKEN", idx,
+                              f"Chain broken at position {idx} ({label}): prev_receipt_hash does not "
+                              f"match receipt_hash at position {idx - 1} — receipt missing, reordered, "
+                              f"or altered", quiet)
+                return 1
+
+        ok, err_code, msg = _check_receipt_silent(receipt, key_hex, ed25519_pub, invalid_signature_exc)
+        if not ok:
+            _chain_output(fmt, False, checked, err_code, idx,
+                          f"Receipt at position {idx} ({label}): {msg}", quiet)
+            return 1
+
+        prev_expected = receipt.get("receipt_hash", "")
+        checked += 1
+
+    _chain_output(fmt, True, checked, None, None, None, quiet)
+    return 0
+
+
 def _output(fmt, ok, err_code=None, message=None, receipt_id=None,
             tenant=None, repo=None, verdict=None, score=None,
             evaluated_at=None, receipt_hash=None, sig_valid=None,
@@ -297,9 +482,10 @@ def _output(fmt, ok, err_code=None, message=None, receipt_id=None,
 def main():
     parser = argparse.ArgumentParser(
         prog="titan-verify",
-        description="Titan Gate Receipt Verifier — TRS-1 v1.0.0 (+ ed25519-v1)",
+        description="Titan Gate Receipt Verifier — TRS-1 v1.0.0 (+ ed25519-v1, chain-walk)",
     )
-    parser.add_argument("receipt", help="Path to receipt JSON file")
+    parser.add_argument("receipt", nargs="?", help="Path to receipt JSON file (single-receipt mode)")
+    parser.add_argument("--chain", help="Path to a chain: directory of *.json receipts (lexicographic order) or a .jsonl file (line order)")
     parser.add_argument("--key", help="Hex-encoded HMAC signing key (hmac-sha256-v1 receipts)")
     parser.add_argument("--pubkey", help="Path to Ed25519 public key file, 32-byte hex (ed25519-v1 receipts)")
     parser.add_argument("--format", default="text", choices=["text", "json"])
@@ -311,6 +497,14 @@ def main():
     if args.version:
         print(f"titan-verify {__version__} ({__spec__})")
         sys.exit(0)
+
+    if args.chain:
+        sys.exit(_verify_chain(chain_path=args.chain, key_hex=args.key,
+                               pubkey_path=args.pubkey, fmt=args.format,
+                               quiet=args.quiet))
+
+    if args.receipt is None:
+        parser.error("a receipt path is required (or use --chain <dir|file.jsonl>)")
 
     sys.exit(verify_receipt(path=args.receipt, key_hex=args.key, fmt=args.format,
                             quiet=args.quiet, pubkey_path=args.pubkey))
