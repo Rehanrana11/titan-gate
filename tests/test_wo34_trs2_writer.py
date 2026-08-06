@@ -134,3 +134,21 @@ def test_writer_module_imports_no_key_material():
     for forbidden in ("Ed25519PrivateKey", "TITAN_SIGNING_KEY",
                       "private_key", "from api", "import api"):
         assert forbidden not in src, f"core must not contain {forbidden!r}"
+
+
+# --- 5. P11 regression: verify path must reject top-level event extras ---
+
+def test_verify_rejects_smuggled_toplevel_event_field():
+    """probe_24 P11: a receipt with an unknown TOP-LEVEL event field,
+    validly re-hashed and re-signed, must FAIL verification. The build
+    path rejects this; the verify path cherry-picked known fields and
+    let it through. Rebuilt-equals-stored closes it."""
+    import hashlib
+    from titan_gate.canonical import canonical_bytes_jcs
+    r = make_receipt()
+    r["event"]["smuggled_payload"] = "exfiltrated content"
+    body = {k: v for k, v in r.items() if k not in ("sig", "receipt_hash")}
+    r["receipt_hash"] = hashlib.sha256(canonical_bytes_jcs(body)).hexdigest()
+    r["sig"]["value"] = _PRIV.sign(bytes.fromhex(r["receipt_hash"])).hex()
+    with pytest.raises(TRS2ReceiptError):
+        verify_trs2_receipt(r, _PUB)

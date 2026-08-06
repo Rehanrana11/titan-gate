@@ -156,7 +156,7 @@ def verify_trs2_receipt(receipt: dict, public_key: Ed25519PublicKey) -> None:
     if not isinstance(ev, dict):
         raise TRS2ReceiptError("event must be a dict")
     try:
-        build_trs2_event(
+        _rebuilt = build_trs2_event(
             source_id=ev.get("source_id"),
             source_event_id=ev.get("source_event_id"),
             event_time=ev.get("event_time"),
@@ -168,6 +168,16 @@ def verify_trs2_receipt(receipt: dict, public_key: Ed25519PublicKey) -> None:
         )
     except TRS2SchemaError as e:
         raise TRS2ReceiptError(f"event invalid: {e}") from e
+    else:
+        # P11 fix: the rebuild above cherry-picks known fields, so an
+        # unknown TOP-LEVEL event field would escape it (nested extras
+        # are caught inside build_trs2_event). Rebuilt must equal
+        # stored exactly — closes smuggling at every level.
+        if _rebuilt != ev:
+            extra = sorted(set(ev) - set(_rebuilt))
+            raise TRS2ReceiptError(
+                f"event contains field(s) outside the closed schema: "
+                f"{extra or 'value divergence'} — no field to fill")
 
     body = {k: v for k, v in receipt.items() if k not in ("sig", "receipt_hash")}
     digest_hex = _body_digest_hex(body)
