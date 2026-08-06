@@ -1,4 +1,4 @@
-# PROCESS.md — Titan Gate Build Discipline v1.0
+# PROCESS.md — Titan Gate Build Discipline v1.1
 **August 6, 2026 · Single process source of truth · Supersedes scattered
 process notes in continuation prompts · Companion to MASTER_STATE Rules 1–6**
 **Ancestry: distilled from ZROS v2.8 (ARE) — mostly as a negative specimen.**
@@ -30,9 +30,10 @@ probe_24 caught P11 this way. No health endpoint ever would have.
 | TG-4 | promote_anchor defined below __main__ guard; import tests structurally blind | Import-based testing gap | Script-mode subprocess smoke is a required test class | def-order lint + smoke test (cd98a7f) |
 | TG-5 | Wire divergence ×4 (ECDSA checkpoints, Prehashed, verbatim-body-leaf, mojibake) | Synthetic tests only prove self-consistency | Every external protocol gets one wire-truth fixture captured from the real system | Repo fixtures (live Rekor entry) |
 | TG-6 | Vendor-side signing capability recurred 4× (BRD, FRD, TDD, ARE code) | Convenience pressure is convergent | No vendor-domain signer ever, including tests; no key defaults — absent key = refuse to sign | Signer-symbol lint; keyless exit 2 |
-| TG-7 | Gate 0 outreach deferred across 4 work orders | Building feels like progress; outreach clocks run on calendar time | Blocking decisions are agenda item #1; delegation to expert ruling is a valid resolution; "no warm path" converts decision → scoped task | D6 pattern |
+| TG-7 | Gate 0 outreach deferred across 4 work orders (= Ω1) | Building feels like progress; outreach clocks run on calendar time | Blocking decisions are agenda item #1; expert ruling / "no warm path"→scoped task are valid resolutions | D6 pattern + §4b Ω-naming |
 | TG-8 | ARE: all gates green, core claim false | Presence-checks over property-attacks | §1 inversion; every claimed property has a mutating AT | Rule 2 + this file |
 | TG-9 | Test asserted mechanism, not property (regex on "schema_version"; closed-set fired first) | Over-specified assertion inferred from truncated read | Assert the PROPERTY (rejection happens); pin the mechanism only when the mechanism is the spec | Test review habit |
+| TG-10 | ARE's 342-line decision tribunal fired 0 times while fatal decisions passed unheard | Governance triggered on every verb; protection attached to files, not properties | Decision checks fire ONLY on irreversible/architectural acts; protection attaches to pinned properties (ATs/goldens), never files | §4b |
 
 **Register discipline:** new incident → new row, same session, with the
 guard named. A row is not closed until its guard is mechanical (lint,
@@ -74,6 +75,16 @@ latency; nothing on it required an attack to fail. Corrected:)
 - **D6** Pushed; `TITAN CLEAN: 0 unpushed`
 - **D7** Honest claim boundary updated in CONTINUATION_PROMPT (Rule 3): what is now [F], what is explicitly NOT yet claimable
 
+## §4b PRE-IRREVERSIBLE CHECK (fires ONLY on irreversible/architectural acts:
+deletions, force-push, publication, key ops, spec stabilization, WO re-order)
+
+Three questions, no tribunal: (1) Reversible in 24h? If NO → blast radius
+named in writing first. (2) Ω-pattern named or "clean": Ω1 engineering-as-
+commercial-avoidance · Ω2 premature completeness · Ω3 premature complexity ·
+Ω4 planning-instead-of-acting. (3) Decision logged with a PREDICTED outcome
+line; predicted-vs-actual reviewed at the quarterly probe_24 run (calibration
+rides an existing clock — no new ceremony).
+
 ## §5 EXPLICIT REJECTIONS (recorded so they cannot return as "optimizations")
 
 - **Self-reported health as integrity proof** (`hash_chain_valid: true`) — the check that let ARE's broken chain pass for months. Integrity is proven only by attacks that fail.
@@ -82,6 +93,8 @@ latency; nothing on it required an attack to fail. Corrected:)
 - **Fix-rate as primary metric** — measures churn, invites commit-relabeling, says nothing about truth. Rule 2 (nothing claimed until its AT passes) is the metric.
 - **Checklist accretion** — ZROS grew 3 laws/5 incidents/3 gates per version while its fatal defect passed every gate. Depth over count: this file stays ≤150 lines; growth requires removal.
 - **Fail-open identity checks** — trust decisions fail closed; only non-trust infrastructure fails open. ARE's /verify failed open on timeout: forged tokens pass during downtime.
+- **Sacred-file rules** — ARE declared its (broken) hash chain "sacred"; untouchability entrenched the defect. Pin properties, never files.
+- **Simulated-panel validation** — labeled expert voices may break a founder deadlock (TG-7); they never validate a claim. Attacks validate.
 
 ## §6 REMOVAL REVIEW (the law ZROS wrote and never obeyed)
 
@@ -91,4 +104,4 @@ removal or demotion. A rule kept "just in case" is weight; weight is how
 checklists replace thinking. This file shrinking is a health signal.
 
 ---
-*v1.0 · Lines: ~148 · Grows only by incident, shrinks by review.*
+*v1.1 · Lines: ~160 (over 150: two rows earn removal at next quarterly review) · Grows only by incident, shrinks by review.*
