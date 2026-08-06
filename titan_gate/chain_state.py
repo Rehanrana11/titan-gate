@@ -39,7 +39,9 @@ def _recomputed_hash(receipt: Dict[str, Any]) -> str:
     profile = receipt.get("schema_version", "receipt_v1")
     if profile == "receipt_v1":
         return hashlib.sha256(canonical_bytes(receipt)).hexdigest()
-    if profile == "receipt_trs2_v1":
+    if profile in ("receipt_trs2_v1", "receipt_trs2_v2"):
+        # v2 (WO-6): identical body recompute — receipt_type lives inside
+        # the body, so the same exclusion covers both TRS-2 profiles.
         body = {k: v for k, v in receipt.items()
                 if k not in ("sig", "receipt_hash")}
         try:
