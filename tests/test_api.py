@@ -136,17 +136,20 @@ class TestEvaluateEndpoint(unittest.TestCase):
         r = client.post("/evaluate", json=BASE_REQUEST)
         self.assertEqual(len(r.json()["signature"]), 64)
 
-    def test_evaluate_genesis_chain(self):
+    def test_evaluate_unchained(self):
+        # WO-3.3: stateless API output is explicitly unchained, not fake-GENESIS
         r = client.post("/evaluate", json=BASE_REQUEST)
-        self.assertEqual(r.json()["prev_receipt_hash"], "GENESIS")
+        self.assertEqual(r.json()["prev_receipt_hash"], "UNCHAINED")
 
-    def test_evaluate_chained_receipt(self):
+    def test_evaluate_caller_prev_ignored(self):
+        # WO-3.3: a caller who can set prev can fork a chain; the field is dead.
+        # Chained writing is covered by tests/test_wo3_writer_chains.py.
         r1 = client.post("/evaluate", json=BASE_REQUEST).json()
         req2 = dict(BASE_REQUEST)
         req2["prev_receipt_hash"] = r1["receipt_hash"]
         req2["pr_number"] = 2
         r2 = client.post("/evaluate", json=req2).json()
-        self.assertEqual(r2["prev_receipt_hash"], r1["receipt_hash"])
+        self.assertEqual(r2["prev_receipt_hash"], "UNCHAINED")
 
     def test_evaluate_repo_preserved(self):
         r = client.post("/evaluate", json=BASE_REQUEST)
