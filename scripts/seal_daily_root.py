@@ -77,6 +77,14 @@ def main():
     parser.add_argument("--receipt-files", nargs="*",
                         help="Explicit receipt files to include")
     parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument("--promote", action="store_true",
+                        help="After sealing, promote the anchor to Rekor")
+    parser.add_argument("--anchor-key", default=None,
+                        help="Path to writer-side EC P-256 private key PEM "
+                             "(anchoring key — NOT the tenant receipt key; "
+                             "WO-7 eviction ledger)")
+    parser.add_argument("--rekor-url", default="https://rekor.sigstore.dev",
+                        help="Rekor base URL")
     args = parser.parse_args()
 
     root_date = args.date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -118,6 +126,35 @@ def main():
         for r in receipts:
             print(f"  [{r.get('verdict')}] {r.get('receipt_id')} score={r.get('composite_score')}")
 
+    if args.promote:
+        if not args.anchor_key:
+            print("ERROR: --promote requires --anchor-key (no key defaults, "
+                  "ever — absent key = refuse to sign)")
+            sys.exit(2)
+        from cryptography.hazmat.primitives import hashes, serialization
+        from cryptography.hazmat.primitives.asymmetric import ec, utils
+        with open(args.anchor_key, "rb") as f:
+            _priv = serialization.load_pem_private_key(f.read(), password=None)
+        _pub_pem = _priv.public_key().public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo).decode("ascii")
+
+        def _sign_fn(digest: bytes) -> bytes:
+            # PREHASHED: digest IS the hash; plain ECDSA(SHA256) would
+            # double-hash and Rekor rejects (wire-proven 2026-08-07)
+            return _priv.sign(digest, ec.ECDSA(utils.Prehashed(hashes.SHA256())))
+
+        repo_name = args.repo.replace("/", "_")
+        apath = get_anchor_path(args.dir, args.tenant, repo_name, root_date)
+        status = promote_anchor(anchor_path=apath, sign_fn=_sign_fn,
+                                public_key_pem=_pub_pem,
+                                base_url=args.rekor_url)
+        if status.ok:
+            print(f"PROMOTED: root {status.root_hash[:16]}... anchored in Rekor")
+            print(f"  Record: {status.record_path}")
+        else:
+            print(f"PROMOTION FAILED (sealed anyway, disclosed): {status.error[:120]}")
+            print(f"  Disclosure: anchor_failure recorded in {apath}")
     sys.exit(0)
 
 
