@@ -36,7 +36,10 @@ __spec__ = "TRS-1 v1.0.0 (+ ed25519-v1, chain-walk)"
 # logged for WO-3 lived in a stale Mar-6 local copy, not in main). Two
 # definitions is still one too many — unify into a single shared module in
 # TRS-2 (WO-3). Do NOT edit one without the other.
-EXCLUSION_FIELDS = {"signature", "receipt_hash", "prev_receipt_hash_verified", "_debug", "_meta"}
+try:
+    from titan_gate.canonical import EXCLUSION_FIELDS, canonical_bytes  # noqa: F401
+except ImportError:  # script mode: verify.py run directly, sibling import
+    from canonical import EXCLUSION_FIELDS, canonical_bytes  # noqa: F401
 
 
 REQUIRED_FIELDS = [
@@ -51,9 +54,6 @@ REQUIRED_FIELDS = [
 ]
 
 
-def canonical_bytes(receipt):
-    filtered = {k: v for k, v in receipt.items() if k not in EXCLUSION_FIELDS}
-    return json.dumps(filtered, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
 
 
 def verify_receipt(path, key_hex=None, fmt="text", quiet=False, pubkey_path=None):
