@@ -123,3 +123,81 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# WO-4.3 part 2b: promote a sealed anchor to Rekor
+#
+# Promotion is writer-layer POLICY (composition of the local anchor
+# file with the Rekor mechanism); titan_gate/anchor_writer.py stays
+# the reusable mechanism. The sign_fn here wraps a writer-side
+# asymmetric ANCHORING key (--anchor-key), deliberately NOT the tenant
+# receipt key: putting tenant-key material in the CI writer before the
+# WO-7 customer container exists is the Rule-1 defect class. The
+# anchoring key is on the WO-7 eviction ledger.
+#
+# State machine on the anchor file (in place, payload_hash recomputed
+# after every mutation — a stale payload_hash is silent corruption):
+#   pending --success--> anchored (+anchored_at, +rekor_record_path)
+#   pending --external failure--> pending (+anchor_failure)   [no raise]
+#   anchored --promote again--> no-op, no resubmission (idempotent:
+#     a re-promotion that resubmits would duplicate PUBLIC log entries)
+#   caller bug (missing/malformed file) --> RAISE, never disclose
+# ---------------------------------------------------------------------------
+import time as _time
+
+from api.anchor import compute_anchor_payload_hash as _recompute_payload_hash
+from titan_gate.anchor_writer import anchor_root as _anchor_root
+from titan_gate.anchor_writer import AnchorWriteStatus as _AnchorWriteStatus
+
+
+class PromoteAnchorError(ValueError):
+    """Caller-side error: anchor file missing or malformed."""
+
+
+def _save_anchor(anchor_path, anchor):
+    anchor.pop("payload_hash", None)
+    anchor["payload_hash"] = _recompute_payload_hash(anchor)
+    tmp = anchor_path + ".tmp"
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(anchor, f, indent=2, sort_keys=True)
+        f.write("\n")
+    os.replace(tmp, anchor_path)
+
+
+def promote_anchor(*, anchor_path, sign_fn, public_key_pem, base_url,
+                   timeout=30.0):
+    """Promote one sealed anchor_v1 file to Rekor. Returns
+    AnchorWriteStatus; raises PromoteAnchorError only on caller bugs."""
+    try:
+        with open(anchor_path, encoding="utf-8") as f:
+            anchor = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        raise PromoteAnchorError(f"anchor file unreadable: {e}") from e
+    if anchor.get("schema") != "anchor_v1":
+        raise PromoteAnchorError(
+            f"not an anchor_v1 file: schema={anchor.get('schema')!r}")
+    root = anchor.get("merkle_root")
+    if not isinstance(root, str) or len(root) != 64:
+        raise PromoteAnchorError(f"anchor has no valid merkle_root: {root!r}")
+
+    if anchor.get("status") == "anchored":
+        return _AnchorWriteStatus(
+            ok=True, root_hash=root,
+            record_path=anchor.get("rekor_record_path", ""))
+
+    out_dir = os.path.dirname(os.path.abspath(anchor_path))
+    status = _anchor_root(root_hash_hex=root, sign_fn=sign_fn,
+                          public_key_pem=public_key_pem,
+                          base_url=base_url, out_dir=out_dir,
+                          timeout=timeout)
+    if status.ok:
+        anchor["status"] = "anchored"
+        anchor["anchored_at"] = int(_time.time())
+        anchor["rekor_record_path"] = status.record_path
+        anchor.pop("anchor_failure", None)
+    else:
+        anchor["anchor_failure"] = {
+            "error": status.error, "timestamp": int(_time.time())}
+    _save_anchor(anchor_path, anchor)
+    return status
