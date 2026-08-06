@@ -118,3 +118,101 @@ def verify_checkpoint_signature(body: bytes, signature: bytes,
         raise RekorVerificationError(
             "checkpoint signature invalid against the pinned log key: "
             "checkpoint is forged, tampered, or from a different log") from e
+
+
+# ---------------------------------------------------------------------------
+# WO-4.2a: signed-note (checkpoint) parsing + ECDSA P-256 verification
+#
+# DISCOVERY (live rekor.sigstore.dev STH, 2026-08-07): the production
+# log signs checkpoints with ECDSA P-256 (DER signatures), NOT Ed25519.
+# verify_checkpoint_signature above (Ed25519) remains for synthetic/
+# future logs; verify_checkpoint_ecdsa is the production path. The
+# CALLER selects the function by the type of the PINNED key — never by
+# sniffing signature bytes, because letting attacker-controlled input
+# choose the verification algorithm is a downgrade-attack shape.
+#
+# Note format (sumdb signed note):
+#   <origin>\n<tree_size>\n<base64 root>\n[extra lines...]\n
+#   \n
+#   \u2014 <name> <base64(4-byte keyhint || signature)>\n   [1..n lines]
+# Body = everything through (and including) the newline BEFORE the
+# blank separator line. Body bytes are returned VERBATIM — never
+# re-serialized — so signature verification sees exactly what was
+# signed (store-bytes-parse-on-read).
+# ---------------------------------------------------------------------------
+import base64 as _base64
+
+from cryptography.hazmat.primitives import hashes as _hashes
+from cryptography.hazmat.primitives.asymmetric import ec as _ec
+
+_SIG_PREFIX = "\u2014 ".encode("utf-8")  # em dash + space
+
+
+def parse_checkpoint_note(note: bytes):
+    """Split a signed note into (body_bytes, signatures).
+
+    signatures is a list of (name, key_hint_4bytes, sig_bytes).
+    Raises RekorVerificationError on any malformation: missing blank-
+    line separator, no signature lines, bad base64, or a signature
+    blob shorter than the 4-byte key hint + 1.
+    """
+    if not isinstance(note, bytes) or not note:
+        raise RekorVerificationError("note must be non-empty bytes")
+    sep = note.find(b"\n\n")
+    if sep == -1:
+        raise RekorVerificationError(
+            "malformed note: no blank-line separator between body and "
+            "signature lines")
+    body = note[:sep + 1]          # body includes its trailing \n
+    sig_block = note[sep + 2:]     # after the blank line
+    sigs = []
+    for raw_line in sig_block.split(b"\n"):
+        if not raw_line.strip():
+            continue
+        if not raw_line.startswith(_SIG_PREFIX):
+            raise RekorVerificationError(
+                f"malformed signature line (missing em-dash prefix): "
+                f"{raw_line[:40]!r}")
+        rest = raw_line[len(_SIG_PREFIX):]
+        space = rest.rfind(b" ")
+        if space == -1:
+            raise RekorVerificationError(
+                "malformed signature line: no name/signature separator")
+        name = rest[:space].decode("utf-8", errors="strict")
+        b64 = rest[space + 1:]
+        try:
+            blob = _base64.b64decode(b64, validate=True)
+        except Exception as e:
+            raise RekorVerificationError(
+                f"signature line base64 invalid: {e}") from e
+        if len(blob) < 5:
+            raise RekorVerificationError(
+                f"signature blob too short ({len(blob)} bytes): must be "
+                f"4-byte key hint + signature")
+        sigs.append((name, blob[:4], blob[4:]))
+    if not sigs:
+        raise RekorVerificationError("note contains no signature lines")
+    return body, sigs
+
+
+def verify_checkpoint_ecdsa(body: bytes, signature_der: bytes,
+                            log_public_key) -> None:
+    """Verify an ECDSA-P256/SHA-256 signature (DER) over checkpoint body
+    bytes against the PINNED log key (production Rekor path). Raises
+    RekorVerificationError on any failure."""
+    if not isinstance(body, bytes) or not body:
+        raise RekorVerificationError("checkpoint body must be non-empty bytes")
+    if not isinstance(signature_der, bytes) or not signature_der:
+        raise RekorVerificationError("signature must be non-empty bytes")
+    if not isinstance(log_public_key, _ec.EllipticCurvePublicKey):
+        raise RekorVerificationError(
+            "log_public_key must be an EC public key for the ECDSA path "
+            "(caller selects algorithm by pinned key type)")
+    try:
+        log_public_key.verify(signature_der, body,
+                              _ec.ECDSA(_hashes.SHA256()))
+    except Exception as e:
+        raise RekorVerificationError(
+            "ECDSA checkpoint signature invalid against the pinned log "
+            "key: checkpoint is forged, tampered, or from a different "
+            "log") from e
