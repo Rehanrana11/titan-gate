@@ -348,8 +348,9 @@ def _chain_output(fmt, ok, receipts_checked, err_code=None, break_position=None,
     print("=" * 60)
 
 
-def _verify_chain_trs2(entries, ed25519_pub, fmt, quiet):
-    """WO-3.5b: chain walk for receipt_trs2_v1 chains (SPEC-2 s1.3:
+def _verify_chain_trs2(entries, ed25519_pub, fmt, quiet,
+                       profile="receipt_trs2_v1"):
+    """WO-3.5b/WO-6: chain walk for TRS-2 chains, v1 and v2 (SPEC-2 s1.3:
     one profile per chain, selected at genesis).
 
     Per-receipt verification is DELEGATED to trs2_writer.verify_trs2_receipt
@@ -360,19 +361,26 @@ def _verify_chain_trs2(entries, ed25519_pub, fmt, quiet):
     usage keeps zero dependencies."""
     if ed25519_pub is None:
         _chain_output(fmt, False, 0, "ERR_PUBKEY_REQUIRED", None,
-                      "receipt_trs2_v1 chain requires --pubkey "
+                      f"{profile} chain requires --pubkey "
                       "(TRS-2 has no HMAC mode; no key can substitute)", quiet)
         return 2
     from titan_gate.trs2_writer import (
-        verify_trs2_receipt, TRS2ReceiptError, TRS2_SCHEMA_VERSION)
+        verify_trs2_receipt, verify_trs2_receipt_v2, TRS2ReceiptError,
+        TRS2_SCHEMA_VERSION_V2)
+    # WO-6: one walk, version-dispatched per-receipt verifier. A second
+    # copy of the walk would recreate the divergence class WO-3.1
+    # eliminated (a future linkage fix landing in one copy only).
+    verify_fn = (verify_trs2_receipt_v2
+                 if profile == TRS2_SCHEMA_VERSION_V2
+                 else verify_trs2_receipt)
     checked = 0
     prev_expected = None
     for idx, (label, receipt) in enumerate(entries):
-        if receipt.get("schema_version") != TRS2_SCHEMA_VERSION:
+        if receipt.get("schema_version") != profile:
             _chain_output(fmt, False, checked, "ERR_CHAIN_PROFILE_MISMATCH", idx,
                           f"Receipt at position {idx} ({label}) declares "
                           f"{receipt.get('schema_version')!r} in a "
-                          f"{TRS2_SCHEMA_VERSION} chain — a chain has ONE "
+                          f"{profile} chain — a chain has ONE "
                           f"profile, declared at genesis", quiet)
             return 1
         prev = receipt.get("prev_receipt_hash", "")
@@ -390,7 +398,7 @@ def _verify_chain_trs2(entries, ed25519_pub, fmt, quiet):
                           f"or altered", quiet)
             return 1
         try:
-            verify_trs2_receipt(receipt, ed25519_pub)
+            verify_fn(receipt, ed25519_pub)
         except TRS2ReceiptError as e:
             _chain_output(fmt, False, checked, "ERR_RECEIPT_INVALID", idx,
                           f"Receipt at position {idx} ({label}): {e}", quiet)
@@ -451,8 +459,9 @@ def _verify_chain(chain_path, key_hex, pubkey_path, fmt, quiet):
         return 2
 
     genesis_profile = entries[0][1].get("schema_version", "receipt_v1")
-    if genesis_profile == "receipt_trs2_v1":
-        return _verify_chain_trs2(entries, ed25519_pub, fmt, quiet)
+    if genesis_profile in ("receipt_trs2_v1", "receipt_trs2_v2"):
+        return _verify_chain_trs2(entries, ed25519_pub, fmt, quiet,
+                                  profile=genesis_profile)
     if genesis_profile != "receipt_v1":
         _chain_output(fmt, False, 0, "ERR_SCHEMA_VERSION", 0,
                       f"Unknown schema_version at genesis: {genesis_profile!r} "
