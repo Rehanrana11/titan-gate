@@ -157,11 +157,6 @@ def main():
             print(f"  Disclosure: anchor_failure recorded in {apath}")
     sys.exit(0)
 
-
-if __name__ == "__main__":
-    main()
-
-
 # ---------------------------------------------------------------------------
 # WO-4.3 part 2b: promote a sealed anchor to Rekor
 #
@@ -238,3 +233,7 @@ def promote_anchor(*, anchor_path, sign_fn, public_key_pem, base_url,
             "error": status.error, "timestamp": int(_time.time())}
     _save_anchor(anchor_path, anchor)
     return status
+
+
+if __name__ == "__main__":
+    main()

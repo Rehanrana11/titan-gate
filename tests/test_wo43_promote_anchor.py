@@ -112,3 +112,34 @@ def test_malformed_anchor_raises_not_discloses(tmp_path):
     with pytest.raises(Exception):
         promote_anchor(anchor_path=str(p), sign_fn=_fake_sign,
                        public_key_pem="x", base_url="https://rekor.example")
+
+
+# --- Regression: script-mode execution (NameError class, found live) ---
+
+def test_all_defs_precede_main_guard():
+    """promote_anchor was appended BELOW `if __name__: main()` — imports
+    define everything before tests run, so import-based tests passed
+    while script execution NameError'd at the call site. Pin: every
+    def precedes the guard."""
+    src = open("scripts/seal_daily_root.py", encoding="utf-8").read()
+    guard = src.find('if __name__ == "__main__":')
+    assert guard != -1
+    import re
+    for m in re.finditer(r"^def (\w+)", src, re.M):
+        assert m.start() < guard, f"def {m.group(1)} is below the main guard"
+
+def test_script_mode_smoke_no_nameerror(tmp_path):
+    """Run the script AS A SCRIPT (subprocess): --promote without
+    --anchor-key must exit 2 with the no-key-defaults message — which
+    requires reaching the promote branch, past where the NameError
+    fired. No network involved on this path."""
+    import subprocess, sys
+    r = subprocess.run(
+        [sys.executable, "scripts/seal_daily_root.py",
+         "--tenant", "t", "--repo", "o/r", "--date", "2099-01-01",
+         "--receipts-dir", str(tmp_path), "--dir", str(tmp_path),
+         "--promote"],
+        capture_output=True, text=True)
+    assert r.returncode == 2, f"rc={r.returncode} err={r.stderr[:200]}"
+    assert "anchor-key" in r.stdout
+    assert "NameError" not in r.stderr
