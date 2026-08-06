@@ -164,11 +164,16 @@ def test_live_submission_roundtrip():
     real hashedrekord for a throwaway hash under a throwaway key.
     Run once, deliberately, from the founder's machine."""
     import hashlib
-    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.primitives.asymmetric import ec, utils
     from cryptography.hazmat.primitives import hashes, serialization
     priv = ec.generate_private_key(ec.SECP256R1())
     artifact = hashlib.sha256(b"titan-gate-wo42b-live-probe").digest()
-    sig = priv.sign(artifact, ec.ECDSA(hashes.SHA256()))
+    # Prehashed: artifact IS the digest. Signing it with plain
+    # ECDSA(SHA256) double-hashes and Rekor rejects (HTTP 400,
+    # confirmed live 2026-08-07). [F] for WO-4.3: the sign_fn seam's
+    # anchoring path signs the raw digest prehashed — same contract
+    # as receipt signing (sign the 32 digest bytes).
+    sig = priv.sign(artifact, ec.ECDSA(utils.Prehashed(hashes.SHA256())))
     pem = priv.public_key().public_bytes(
         serialization.Encoding.PEM,
         serialization.PublicFormat.SubjectPublicKeyInfo).decode()
