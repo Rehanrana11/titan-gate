@@ -14,9 +14,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # Modules intentionally RED (test written before implementation, TDD D1).
-KNOWN_RED = {
-    "tests/test_wo51_tsa_verify.py",  # WO-5.1: titan_gate.tsa_verify pending
-}
+KNOWN_RED = set()  # empty: WO-5.1 landed green; nothing intentionally red now
 
 
 def _collection_errors() -> set:
