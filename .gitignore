@@ -7,3 +7,4 @@ titan_gate.egg-info/
 .titan/
 proof_bundle.*
 .pytest_cache/
+.coverage
