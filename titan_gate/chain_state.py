@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-from titan_gate.canonical import canonical_bytes
+from titan_gate.canonical import canonical_bytes, canonical_bytes_jcs, JCSError
 
 GENESIS = "GENESIS"
 
@@ -26,7 +26,30 @@ class ChainStateError(Exception):
 
 
 def _recomputed_hash(receipt: Dict[str, Any]) -> str:
-    return hashlib.sha256(canonical_bytes(receipt)).hexdigest()
+    """Per-profile hash recompute (SPEC-2 s1.3: canonicalizations are
+    profile-bound and non-interchangeable; schema_version selects).
+
+    receipt_v1 / absent: TRS-1 sorted-keys path, byte-identical to
+    pre-WO-3.5 behavior (field exclusion lives inside canonical_bytes,
+    golden-pinned). receipt_trs2_v1: SHA-256 over JCS(body), body =
+    receipt minus sig and stored receipt_hash (mirrors trs2_writer).
+    Unknown versions hard-error: a walker that silently falls back to
+    a default canonicalization is a verifier that can be steered.
+    """
+    profile = receipt.get("schema_version", "receipt_v1")
+    if profile == "receipt_v1":
+        return hashlib.sha256(canonical_bytes(receipt)).hexdigest()
+    if profile == "receipt_trs2_v1":
+        body = {k: v for k, v in receipt.items()
+                if k not in ("sig", "receipt_hash")}
+        try:
+            return hashlib.sha256(canonical_bytes_jcs(body)).hexdigest()
+        except JCSError as e:
+            raise ChainStateError(
+                f"TRS-2 receipt not JCS-canonicalizable: {e}") from e
+    raise ChainStateError(
+        f"unknown schema_version {profile!r}: no canonicalization "
+        f"fallback exists by design")
 
 
 def latest_receipt_hash(receipts_root) -> str:
@@ -42,6 +65,7 @@ def latest_receipt_hash(receipts_root) -> str:
         return GENESIS
 
     receipts = []
+    profiles = set()
     for p in paths:
         try:
             r = json.loads(p.read_text(encoding="utf-8"))
@@ -52,6 +76,11 @@ def latest_receipt_hash(receipts_root) -> str:
         if not stored or not prev:
             raise ChainStateError(
                 f"receipt {p} missing receipt_hash/prev_receipt_hash")
+        profiles.add(r.get("schema_version", "receipt_v1"))
+        if len(profiles) > 1:
+            raise ChainStateError(
+                f"mixed profiles in one tree {sorted(profiles)} at {p}: "
+                f"a chain has ONE profile, declared at genesis (SPEC-2 s1.3)")
         if _recomputed_hash(r) != stored:
             raise ChainStateError(
                 f"receipt {p}: stored receipt_hash does not match recomputed "
