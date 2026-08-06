@@ -9,6 +9,7 @@ import pathlib
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from judge_engine.v1.engine import evaluate
+from titan_gate.chain_state import latest_receipt_hash
 
 
 def get_changed_files(base_branch):
@@ -152,7 +153,7 @@ def main():
         base_branch=args.base,
         commit_sha=args.sha,
         key_hex=key,
-        prev_receipt_hash="GENESIS",
+        prev_receipt_hash=latest_receipt_hash(pathlib.Path(".titan") / "receipts"),
     )
 
     chain_path = save_receipt(receipt, args.output)
