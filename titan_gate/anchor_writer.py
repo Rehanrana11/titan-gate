@@ -113,3 +113,82 @@ def anchor_root(*, root_hash_hex: str, sign_fn, public_key_pem: str,
     })
     return AnchorWriteStatus(ok=True, root_hash=root_hash_hex,
                              record_path=record_path)
+
+
+# --------------------------------------------------------------------------
+# WO-5.2b — anchor_root_v2: dual-leg seal with disclosed degradation.
+# Additive: anchor_root (v1, Rekor-only) above is untouched and remains the
+# reader-compatible path for existing anchors. Failure philosophy inherited:
+# caller bugs RAISE; external leg failures DISCLOSE (status file) and return.
+# Ordering is legs-then-write: no record file may exist unless at least one
+# leg actually anchored the root (a total failure leaves nothing
+# anchor-shaped on disk — see test_wo52b, PROCESS.md §1).
+# --------------------------------------------------------------------------
+
+def anchor_root_v2(*, root_hash_hex: str, rekor_fn, tsa_fn,
+                   out_dir: str) -> AnchorWriteStatus:
+    """Seal one interval root under BOTH anchor legs via injected seams.
+
+    rekor_fn(root_hash_hex) -> anchor-record dict (v1 shape) or raises.
+    tsa_fn(root_hash_hex)   -> DER token bytes or raises.
+    Both seams are attempted independently; one failure degrades with
+    disclosure, two failures write no record at all.
+    """
+    from titan_gate.anchor_v2 import build_anchor_v2_record, AnchorV2Error
+
+    # --- caller-input validation: bugs RAISE, never disclose ---
+    if not isinstance(root_hash_hex, str) or not _HEX64.fullmatch(root_hash_hex):
+        raise AnchorWriterError(
+            f"root_hash_hex must be 64 lowercase hex chars, got "
+            f"{root_hash_hex!r}")
+    if not callable(rekor_fn) or not callable(tsa_fn):
+        raise AnchorWriterError("rekor_fn and tsa_fn must be callable")
+    if not isinstance(out_dir, str) or not out_dir:
+        raise AnchorWriterError("out_dir must be a non-empty path")
+    os.makedirs(out_dir, exist_ok=True)
+
+    # --- attempt each leg independently; failures collected, not raised ---
+    leg_errors = {}
+    rekor_record = None
+    tsa_token = None
+    try:
+        rekor_record = rekor_fn(root_hash_hex)
+    except Exception as e:  # noqa: BLE001 — seam failures are external
+        leg_errors["rekor"] = str(e)
+    try:
+        tsa_token = tsa_fn(root_hash_hex)
+    except Exception as e:  # noqa: BLE001
+        leg_errors["tsa"] = str(e)
+
+    now = int(time.time())
+
+    # --- total failure: disclose BOTH, write NOTHING anchor-shaped ---
+    if rekor_record is None and tsa_token is None:
+        err = "; ".join(f"{leg}: {msg}" for leg, msg in sorted(leg_errors.items()))
+        _write_json(_status_path(out_dir), {
+            "attempted": True, "ok": False, "schema": "anchor_v2",
+            "root_hash": root_hash_hex, "legs_failed": leg_errors,
+            "error": err, "timestamp": now,
+        })
+        return AnchorWriteStatus(ok=False, root_hash=root_hash_hex, error=err)
+
+    # --- at least one leg stood: build (zero-legs refusal unreachable
+    #     here, but the builder's own gate stays the last line) ---
+    try:
+        record = build_anchor_v2_record(root_hash_hex=root_hash_hex,
+                                        rekor_record=rekor_record,
+                                        tsa_token=tsa_token)
+    except AnchorV2Error as e:
+        raise AnchorWriterError(f"record build failed: {e}") from e
+
+    record_path = os.path.join(out_dir, f"anchor_v2_{root_hash_hex[:16]}.json")
+    _write_json(record_path, record)
+    _write_json(_status_path(out_dir), {
+        "attempted": True, "ok": True, "schema": "anchor_v2",
+        "root_hash": root_hash_hex,
+        "degraded": bool(leg_errors),
+        "legs_failed": leg_errors,          # names WHICH leg and WHY
+        "error": "", "timestamp": now,
+    })
+    return AnchorWriteStatus(ok=True, root_hash=root_hash_hex,
+                             record_path=record_path)
