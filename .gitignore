@@ -8,3 +8,4 @@ titan_gate.egg-info/
 proof_bundle.*
 .pytest_cache/
 .coverage
+CONTINUATION_PROMPT.md
