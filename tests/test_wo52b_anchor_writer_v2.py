@@ -30,7 +30,9 @@ TSA_CA = "tests/fixtures/tsa/freetsa_cacert.pem"
 
 def _fixtures():
     a = json.load(open(ANCHOR, encoding="utf-8"))
-    rekor = json.load(open(a["rekor_record_path"], encoding="utf-8"))
+    rp = os.path.join(os.path.dirname(ANCHOR),
+                      os.path.basename(a["rekor_record_path"].replace("\\", "/")))
+    rekor = json.load(open(rp, encoding="utf-8"))
     pub = serialization.load_pem_public_key(open(LOG_PUBKEY, "rb").read())
     token = open(TSA_TOKEN, "rb").read()
     ca_pem = open(TSA_CA, "rb").read()

@@ -13,6 +13,7 @@ Wire truth: Rekor leg = the repo's own live anchor (log_index 2239591431);
 TSA leg = real freetsa token over the SAME production root 4933083c....
 """
 import json
+import os
 import pytest
 from cryptography.hazmat.primitives import serialization
 
@@ -31,7 +32,9 @@ TSA_CA = "tests/fixtures/tsa/freetsa_cacert.pem"
 
 def _load():
     a = json.load(open(ANCHOR, encoding="utf-8"))
-    rekor = json.load(open(a["rekor_record_path"], encoding="utf-8"))
+    rp = os.path.join(os.path.dirname(ANCHOR),
+                      os.path.basename(a["rekor_record_path"].replace("\\", "/")))
+    rekor = json.load(open(rp, encoding="utf-8"))
     pub = serialization.load_pem_public_key(open(LOG_PUBKEY, "rb").read())
     token = open(TSA_TOKEN, "rb").read()
     ca_pem = open(TSA_CA, "rb").read()
