@@ -43,10 +43,8 @@ RECEIPT_FIELDS = frozenset({
 })
 SIG_FIELDS = frozenset({"key_id", "alg", "value"})
 
-
 class TRS2ReceiptError(ValueError):
     """Receipt failed structural validation or cryptographic verification."""
-
 
 def _body_digest_hex(body: dict) -> str:
     try:
@@ -54,13 +52,11 @@ def _body_digest_hex(body: dict) -> str:
     except JCSError as e:
         raise TRS2ReceiptError(f"body not canonicalizable: {e}") from e
 
-
 def _check_prev(prev: str) -> None:
     if prev != "GENESIS" and not _HEX64.fullmatch(prev or ""):
         raise TRS2ReceiptError(
             f"prev_receipt_hash must be 'GENESIS' or 64 lowercase hex, got {prev!r}"
         )
-
 
 def build_trs2_receipt(*, event: dict, tenant_id: str, seq: int,
                        prev_receipt_hash: str, sign_fn, key_id: str) -> dict:
@@ -116,7 +112,6 @@ def build_trs2_receipt(*, event: dict, tenant_id: str, seq: int,
     receipt["receipt_hash"] = digest_hex
     receipt["sig"] = {"key_id": key_id, "alg": _SIG_ALG, "value": sig_bytes.hex()}
     return receipt
-
 
 def verify_trs2_receipt(receipt: dict, public_key: Ed25519PublicKey) -> None:
     """Verify one receipt structurally and cryptographically. Raises on any failure.
@@ -194,7 +189,6 @@ def verify_trs2_receipt(receipt: dict, public_key: Ed25519PublicKey) -> None:
             "signature invalid for this public key over the recomputed digest"
         ) from e
 
-
 # =====================================================================
 # WO-6: receipt_trs2_v2 — adds required receipt_type {action,gap,marker}
 # (SPEC-2 amendment). Strictly additive: v1 above is golden-pinned and
@@ -215,7 +209,6 @@ _RECEIPT_BASE_FIELDS_V2 = frozenset({
 })
 _GAP_OPEN_FIELDS = frozenset({"source_id", "interval_start"})
 _GAP_CLOSE_FIELDS = frozenset({"source_id", "interval_start", "interval_end"})
-
 
 def _validate_gap_block(gap: dict, receipt_type: str) -> dict:
     """Closed-set validation of a gap/marker block. Returns a clean copy.
@@ -238,7 +231,6 @@ def _validate_gap_block(gap: dict, receipt_type: str) -> dict:
             raise TRS2ReceiptError(
                 f"gap.{f} must be a non-empty string, got {v!r}")
     return {f: gap[f] for f in sorted(expected)}
-
 
 def build_trs2_receipt_v2(*, receipt_type, tenant_id: str, seq: int,
                           prev_receipt_hash: str, sign_fn, key_id: str,
@@ -313,7 +305,6 @@ def build_trs2_receipt_v2(*, receipt_type, tenant_id: str, seq: int,
                       "value": sig_bytes.hex()}
     return receipt
 
-
 def verify_trs2_receipt_v2(receipt: dict,
                            public_key: Ed25519PublicKey) -> None:
     """Verify one v2 receipt structurally and cryptographically.
@@ -325,6 +316,14 @@ def verify_trs2_receipt_v2(receipt: dict,
     if not isinstance(receipt, dict):
         raise TRS2ReceiptError("receipt must be a dict")
     rtype = receipt.get("receipt_type")
+
+    if not isinstance(rtype, str):
+
+        raise TRS2ReceiptError(
+
+            f"receipt_type must be a string, got "
+
+            f"{type(rtype).__name__}")
     if rtype not in RECEIPT_TYPES:
         raise TRS2ReceiptError(
             f"receipt_type must be one of {sorted(RECEIPT_TYPES)}, "
@@ -399,7 +398,6 @@ def verify_trs2_receipt_v2(receipt: dict,
         public_key.verify(sig_bytes, bytes.fromhex(digest_hex))
     except InvalidSignature as e:
         raise TRS2ReceiptError("Ed25519 signature verification failed") from e
-
 
 __all__ += [
     "build_trs2_receipt_v2",
