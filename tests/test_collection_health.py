@@ -14,7 +14,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # Modules intentionally RED (test written before implementation, TDD D1).
-KNOWN_RED = {"tests/test_wo52_anchor_v2.py"}  # WO-5.2 red AT (D1)
+KNOWN_RED = set()  # empty: WO-5.2 verifier landed green
 
 
 def _collection_errors() -> set:
