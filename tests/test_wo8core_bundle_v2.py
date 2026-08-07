@@ -36,19 +36,26 @@ def _copy(src: Path, tmp_path: Path) -> Path:
     return dst
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
 def _titan_verify(bundle_dir: Path):
-    """Run the exact public command the README tells a stranger to run."""
-    cmd = [sys.executable, "-m", "titan_gate.verify", "--chain",
-           str(bundle_dir / "receipts"),
-           "--pubkey", str(bundle_dir / "pubkey.pem")]
-    proc = subprocess.run(cmd, capture_output=True, text=True,
-                          cwd=str(bundle_dir))
-    if "No module named" in (proc.stderr or ""):
-        proc = subprocess.run(
-            ["titan-verify", "--chain", str(bundle_dir / "receipts"),
-             "--pubkey", str(bundle_dir / "pubkey.pem")],
-            capture_output=True, text=True, cwd=str(bundle_dir))
-    return proc
+    """Invoke the CURRENT packaged CLI (titan_gate.verify:main — the same
+    function the titan-verify console script maps to) against the bundle.
+    Absolute paths; run from repo root so the repo's code is what runs,
+    never a stale installed build. Self-containment is enforced by the
+    tmp COPY, not by cwd."""
+    # Invoke main() exactly as the titan-verify console script does
+    # (pyproject: titan-verify = "titan_gate.verify:main"), bypassing
+    # runpy's -m path which collides with an installed copy of the pkg.
+    prog = ("import sys; sys.argv = ['titan-verify'] + sys.argv[1:]; "
+            "from titan_gate.verify import main; main()")
+    cmd = [sys.executable, "-c", prog, "--chain",
+           str((bundle_dir / "receipts").resolve()),
+           "--pubkey", str((bundle_dir / "pubkey.hex").resolve())]
+    env = dict(__import__('os').environ, PYTHONPATH=str(REPO_ROOT))
+    return subprocess.run(cmd, capture_output=True, text=True,
+                          cwd=str(REPO_ROOT), env=env)
 
 
 def test_bundle_v2_verifies_offline_from_directory_alone(kit, tmp_path):
