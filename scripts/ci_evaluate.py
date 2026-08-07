@@ -128,7 +128,11 @@ def main():
     parser.add_argument("--output", default="receipt.json")
     args = parser.parse_args()
 
-    key = os.environ.get("TITAN_SIGNING_KEY", "0" * 64)
+    key = os.environ.get("TITAN_SIGNING_KEY")
+    if not key:
+        raise SystemExit(
+            "TITAN_SIGNING_KEY not set — refusing to sign. A receipt "
+            "under a known-default key is worse than no receipt (Rule 1).")
     token = os.environ.get("GITHUB_TOKEN", "")
 
     changed_files = get_changed_files(args.base)
