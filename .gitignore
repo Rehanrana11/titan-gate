@@ -9,3 +9,8 @@ proof_bundle.*
 .pytest_cache/
 .coverage
 CONTINUATION_PROMPT.md
+
+.mutmut-cache
+mutants/
+.mutmut_cache
+html/

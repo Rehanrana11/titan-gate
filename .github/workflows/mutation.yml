@@ -1,0 +1,27 @@
+name: Mutation Testing
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 15 2,5,8,11 *"   # quarterly, mid-month (offset from probe_24)
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install deps + mutmut
+        run: |
+          pip install -r requirements.txt
+          pip install mutmut
+      - name: Run mutation testing on the crypto core
+        run: |
+          mutmut run || true          # non-zero exit if survivors; report anyway
+      - name: Report — the honest kill ratio
+        if: always()
+        run: |
+          echo "=== MUTATION RESULTS (survivors = untested lines) ==="
+          mutmut results || true
