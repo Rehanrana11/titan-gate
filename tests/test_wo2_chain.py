@@ -29,7 +29,7 @@ import time
 
 import pytest
 
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VERIFY_PY = os.path.join(REPO_ROOT, "titan_gate", "verify.py")
 
 sys.path.insert(0, REPO_ROOT)
