@@ -1,11 +1,23 @@
 from typing import Dict, Any
 
+ABSTENTION = "INSUFFICIENT_CONTEXT"
+
 
 def evaluate(artifact: str, scope: Dict[str, Any]) -> Dict[str, Any]:
     try:
         return {"semantic_score": _score(artifact), "hard_violations": [], "process_violations": []}
-    except Exception:
-        return {"semantic_score": 0.5, "hard_violations": [], "process_violations": []}
+    except Exception as exc:
+        # WO-S1: abstain loudly instead of defaulting silently. A judge that
+        # cannot read its input has no opinion; the old 0.5 was a silent
+        # default inside a scoring instrument -- the defect class W1
+        # diagnosed in policy_judge.
+        return {
+            "semantic_score": None,
+            "abstention": ABSTENTION,
+            "abstention_reason": "%s: %s" % (type(exc).__name__, exc),
+            "hard_violations": [],
+            "process_violations": [],
+        }
 
 
 def _score(a: str) -> float:

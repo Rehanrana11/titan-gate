@@ -58,12 +58,13 @@ def test_output_space_is_25_values():
     assert min(seen) == 0.5 and max(seen) == 0.78
 
 
-def test_bare_except_returns_a_silent_default():
-    """evaluate() wraps _score in `except Exception` and returns 0.5. A None
-    artifact raises TypeError inside _score and the caller receives a score,
-    not an error. sdlc-v2 phase 6 gates on `grep for bare except = 0`; this is
-    that grep hit, and it is in the judge itself."""
-    assert score(None) == 0.5
+def test_exception_yields_abstention_not_a_silent_default():
+    """WO-S1 (PLAN_LOCK_WO_S_v1): the bare-except silent 0.5 is gone.
+    An unreadable input yields the abstention token, never a number."""
+    out = semantic_judge.evaluate(None, {})
+    assert out["semantic_score"] is None
+    assert out["abstention"] == "INSUFFICIENT_CONTEXT"
+
 
 
 def test_violations_are_hardcoded_empty():
