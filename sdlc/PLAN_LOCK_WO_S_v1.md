@@ -56,14 +56,14 @@ repo, output pasted. "Done except X" = not done.
   battery subset in pre-commit.
 - Done-test: a commit's hook output showing all three ran; then a seeded
   selftest failure shown to block a commit.
-- EVIDENCE: [UNFILLED]
+- EVIDENCE: [MEASURED: amend 368e620 -- hook output 'validator selftests green' + suite '899 passed, 1 skipped, 10 xfailed'; negative proof: fixture aside -> 'VALIDATOR SELFTEST RED -- commit blocked', NEGATIVE_EXIT=1, blocked commit absent from git log; 2026-08-17]
 
 **WO-S4 — contrastive negatives per rubric level** (order: 4)
 - Task: one annotated known-bad per judge rubric level, extending the
   D5-xfail discipline. NOT a golden set (see §3).
 - Done-test: each negative provably scores below its level's positive, in a
   committed test.
-- EVIDENCE: [UNFILLED]
+- EVIDENCE: [MEASURED: amend 368e620 -- hook output 'validator selftests green' + suite '899 passed, 1 skipped, 10 xfailed'; negative proof: fixture aside -> 'VALIDATOR SELFTEST RED -- commit blocked', NEGATIVE_EXIT=1, blocked commit absent from git log; 2026-08-17]
 
 **WO-S2 — cost per receipt** (order: 5)
 - Task: tokens + $ logged per receipt; one published number.
