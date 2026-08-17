@@ -1,0 +1,26 @@
+{
+  "_note": "The exact finding-id set the known-bad ledger must produce. Asserted on IDS, never on a count. Adding a check means adding its seeded row to cs_ledger_known_bad-v1.json and its id here, in the same change.",
+  "_seeding_map": {
+    "CS1": "X-1 sits at ASSERTED while appearing on an external surface that requires PROBED",
+    "CS2": "X-2 is a security-category claim declaring a required rung below SHIPPED-PROBED",
+    "CS3": "X-3 was last verified far outside its re-verify interval",
+    "CS4": "X-4 sits above ASSERTED while a live defect contradicts it",
+    "CS5": "X-5 carries prose where a provenance tag belongs",
+    "CS6": "the shipped README fixture asserts cryptographic verifiability that no ledger row covers",
+    "CS7": "X-6 claims SHIPPED-PROBED and names no shipping artifact",
+    "CS8": "X-7 is retracted with no note; X-8 was deleted from the ledger outright"
+  },
+  "finding_ids": [
+    "CS1@X-1",
+    "CS2@X-2",
+    "CS3@X-3",
+    "CS4@X-4",
+    "CS5@X-5",
+    "CS6@shipped_readme_known_bad-v1.md:8",
+    "CS7@X-6",
+    "CS8@X-7",
+    "CS8@X-8"
+  ],
+  "checks_that_must_run": ["CS1","CS2","CS3","CS4","CS5","CS6","CS7","CS8"],
+  "schema_errors": []
+}

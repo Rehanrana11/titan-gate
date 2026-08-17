@@ -1,0 +1,66 @@
+{
+  "_note": "KNOWN-BAD FIXTURE. One seeded finding per claim_sweep check. Do not copy into a real ledger.",
+  "rows": [
+    {
+      "id": "X-1", "claim": "the widget handles every supported input",
+      "category": "capability", "appears_in": ["fixtures/shipped_readme_known_bad-v1.md"],
+      "rung": "ASSERTED", "required_rung": "PROBED",
+      "evidence": "[UNVERIFIED]", "advancing_probe": "run the corpus",
+      "shipping_artifact": "the installed package", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8"
+    },
+    {
+      "id": "X-2", "claim": "the widget keeps records in order",
+      "category": "security", "appears_in": [],
+      "rung": "ASSERTED", "required_rung": "PROBED",
+      "evidence": "[UNVERIFIED]", "advancing_probe": "read the shipped default",
+      "shipping_artifact": "the installed package", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8"
+    },
+    {
+      "id": "X-3", "claim": "the widget starts in under a second",
+      "category": "performance", "appears_in": [],
+      "rung": "PROBED", "required_rung": "PROBED",
+      "evidence": "[MEASURED: timing harness -> under a second]",
+      "advancing_probe": "re-time on the shipped build",
+      "shipping_artifact": "the installed package", "last_verified": "2026-01-01",
+      "reverify_days": 30, "owner": "E8"
+    },
+    {
+      "id": "X-4", "claim": "the widget reads the whole file",
+      "category": "capability", "appears_in": [],
+      "rung": "PROBED", "required_rung": "PROBED",
+      "evidence": "[QUOTED: notes: the reader walks the file]",
+      "advancing_probe": "read the shipped reader",
+      "shipping_artifact": "the installed package", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8",
+      "pinned_by": ["the reader stops at the first chunk"]
+    },
+    {
+      "id": "X-5", "claim": "the widget writes one row per input",
+      "category": "capability", "appears_in": [],
+      "rung": "SOURCED", "required_rung": "PROBED",
+      "evidence": "measured by me", "advancing_probe": "count the rows",
+      "shipping_artifact": "the installed package", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8"
+    },
+    {
+      "id": "X-6", "claim": "the widget names each output after its input",
+      "category": "capability", "appears_in": [],
+      "rung": "SHIPPED-PROBED", "required_rung": "PROBED",
+      "evidence": "[MEASURED: ls -l -> one name per input]",
+      "advancing_probe": "already at the top rung",
+      "shipping_artifact": "", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8"
+    },
+    {
+      "id": "X-7", "claim": "the widget never needed a second pass",
+      "category": "capability", "appears_in": [],
+      "rung": "ASSERTED", "required_rung": "PROBED",
+      "evidence": "[UNVERIFIED]", "advancing_probe": "none",
+      "shipping_artifact": "the installed package", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8",
+      "retracted": true
+    }
+  ]
+}

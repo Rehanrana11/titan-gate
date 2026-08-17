@@ -1,0 +1,23 @@
+{
+  "_note": "DELIBERATELY WRONG. Used only by --selftest-meta to prove the selftest is able to fail. One expected id has been removed and one invented; do not fix this file.",
+  "violation_ids": [
+    "V1@G-M9-01",
+    "V2@I-3",
+    "V3@G-M2-01:known_bad",
+    "V3@G-M6-01:command",
+    "V4@L44:0.7",
+    "V4@L88:38",
+    "V5@L112",
+    "V6@L117:destructive-step-not-&&-chained",
+    "V7@echo hello",
+    "V8@L88:38",
+    "V10@fail_closed-flipped-to-false",
+    "V10@fail_closed=true-removed",
+    "V11@G-M5-01:missing",
+    "V12@L999:this-violation-does-not-exist"
+  ],
+  "checks_that_must_run": [
+    "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12"
+  ],
+  "gate_schema_errors": []
+}

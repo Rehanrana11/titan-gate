@@ -1,0 +1,59 @@
+[
+  {
+    "id": "G-M1-01",
+    "tier": "CORE",
+    "mechanism": "M1",
+    "parents": ["I-1"],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "predicate", "body": "a sentence references a tool, path, shell feature or encoding on the target machine"},
+    "check": {"kind": "predicate", "body": "present:\\[(MEASURED|QUOTED)", "max_seconds": 5},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-claim",
+    "fixtures": {
+      "known_bad": "run make test from the repo root",
+      "known_good": "run python -m pytest [MEASURED: which python -> usr bin python]"
+    },
+    "tamper_signature": "any change adding 'or reasonably inferred' to the CHECK",
+    "cost_per_fire_s": 5
+  },
+  {
+    "id": "G-M2-01",
+    "tier": "CORE",
+    "mechanism": "M2",
+    "parents": ["I-2"],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "event", "body": "about to derive a plan, spec or threshold"},
+    "check": {"kind": "predicate", "body": "present:(read|QUOTED)", "max_seconds": 5},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-plan",
+    "fixtures": {
+      "known_bad": "the phase list was chosen from memory",
+      "known_good": "the phase list follows what the deciding document says [QUOTED: spec: phases]"
+    },
+    "tamper_signature": "accepting 'skimmed' as evidence of having read",
+    "cost_per_fire_s": 10
+  },
+  {
+    "id": "G-M5-01",
+    "tier": "CORE",
+    "mechanism": "M5",
+    "parents": ["I-2"],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "event", "body": "about to emit a pasteable block"},
+    "check": {"kind": "predicate", "body": "block_safety", "max_seconds": 5},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-paste",
+    "fixtures": {
+      "known_bad": "rm -rf build",
+      "known_good": "cd /home/claude/sdlc-validators\ntest -f validate_zros.py && python3 validate_zros.py --selftest"
+    },
+    "tamper_signature": "exempting a destructive verb instead of chaining it",
+    "cost_per_fire_s": 5
+  }
+]

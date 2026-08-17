@@ -1,0 +1,25 @@
+{
+  "_note": "DELIBERATELY WRONG. Used only by --selftest-meta to prove the selftest is able to fail. Do not fix this file.",
+  "finding_ids": [
+    "CS1@X-1",
+    "CS2@X-2",
+    "CS3@X-3",
+    "CS4@X-4",
+    "CS5@X-5",
+    "CS6@shipped_readme_known_bad-v1.md:8",
+    "CS8@X-7",
+    "CS8@X-8",
+    "CS9@does-not-exist"
+  ],
+  "checks_that_must_run": [
+    "CS1",
+    "CS2",
+    "CS3",
+    "CS4",
+    "CS5",
+    "CS6",
+    "CS7",
+    "CS8"
+  ],
+  "schema_errors": []
+}

@@ -1,0 +1,120 @@
+[
+  {
+    "id": "G-M1-01",
+    "tier": "CORE",
+    "mechanism": "M1",
+    "parents": ["I-1"],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "predicate", "body": "a sentence claims a property of the target machine"},
+    "check": {"kind": "predicate", "body": "present:\\[(MEASURED|QUOTED)", "max_seconds": 5},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-claim",
+    "fixtures": {
+      "known_bad": "run make test from the repo root",
+      "known_good": "run python -m pytest [MEASURED: which python -> /usr/bin/python]"
+    },
+    "tamper_signature": "any change adding 'or reasonably inferred' to the CHECK",
+    "cost_per_fire_s": 5
+  },
+  {
+    "id": "G-M2-01",
+    "tier": "CORE",
+    "mechanism": "M2",
+    "parents": ["I-2"],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "regex", "body": "about to derive a plan"},
+    "check": {"kind": "predicate", "body": "absent:NEVERAPPEARS", "max_seconds": 5},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-plan",
+    "fixtures": {
+      "known_bad": "SEEDED V3: this known-bad fixture does not trip its own check",
+      "known_good": "a plan derived after reading the deciding document"
+    },
+    "tamper_signature": "narrowing the absent: pattern until nothing matches it",
+    "cost_per_fire_s": 5
+  },
+  {
+    "id": "G-M9-01",
+    "tier": "CORE",
+    "mechanism": "M9",
+    "parents": [],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "event", "body": "a documented lesson is about to be repeated"},
+    "check": {"kind": "predicate", "body": "present:\\[(MEASURED|QUOTED)", "max_seconds": 5},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-close",
+    "fixtures": {
+      "known_bad": "SEEDED V1: this gate has no parent incident",
+      "known_good": "a lesson encoded as structure [QUOTED: register: lesson]"
+    },
+    "tamper_signature": "adding a parent id that does not exist in the register",
+    "cost_per_fire_s": 5
+  },
+  {
+    "id": "G-M5-01",
+    "tier": "CORE",
+    "mechanism": "M5",
+    "parents": ["I-2"],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "event", "body": "about to emit a pasteable block"},
+    "check": {"kind": "predicate", "body": "no_placeholder", "max_seconds": 5},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-paste",
+    "fixtures": {
+      "known_bad": "curl -H \"Bearer YOUR_TOKEN_HERE\" https://example.invalid",
+      "known_good": "cd /home/claude && python -m pytest"
+    },
+    "tamper_signature": "exempting a placeholder form instead of resolving it",
+    "cost_per_fire_s": 5
+  },
+  {
+    "id": "G-M6-01",
+    "tier": "STANDARD",
+    "mechanism": "M6",
+    "parents": ["I-2"],
+    "consequence": "COSTLY",
+    "consequence_model": null,
+    "trigger": {"kind": "event", "body": "about to send a delivered file"},
+    "check": {"kind": "command", "body": "python -c \"import sys; sys.exit(0)\"", "max_seconds": 30},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-send",
+    "fixtures": {
+      "known_bad": "SEEDED V3: a command check that was never executed",
+      "known_good": "a delivered file whose name matches the consume command"
+    },
+    "tamper_signature": "replacing the command with one that cannot return non-zero",
+    "cost_per_fire_s": 5
+  },
+  {
+    "id": "G-A1",
+    "tier": "ANTICIPATED",
+    "mechanism": null,
+    "parents": [],
+    "consequence": "EXISTENTIAL",
+    "consequence_model": {
+      "first_occurrence": "a customer relies on a false security claim",
+      "why_no_second_chance": "trust products do not get a second audit after the first false attestation surfaces",
+      "adoption_basis": "[REPORTED: operator mission statement, 2026-08-17]"
+    },
+    "trigger": {"kind": "event", "body": "an artifact addressed to an external consumer carries a capability or security claim"},
+    "check": {"kind": "predicate", "body": "present:\\[(MEASURED|QUOTED)", "max_seconds": 10},
+    "fail_closed": true,
+    "on_fail": "BLOCK",
+    "placement": "pre-send",
+    "fixtures": {
+      "known_bad": "receipts prove what was evaluated",
+      "known_good": "receipts carry integrity, not non-repudiation [QUOTED: SPEC: signing profiles]"
+    },
+    "tamper_signature": "downgrading on_fail to WARN so a release can go out",
+    "cost_per_fire_s": 10
+  }
+]

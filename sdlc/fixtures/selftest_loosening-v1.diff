@@ -1,0 +1,7 @@
+--- a/zros_gates.json
++++ b/zros_gates.json
+@@ -10,7 +10,7 @@
+     "placement": "pre-claim",
+-    "fail_closed": true,
++    "fail_closed": false,
+     "tamper_signature": "any change adding 'or reasonably inferred' to the CHECK",

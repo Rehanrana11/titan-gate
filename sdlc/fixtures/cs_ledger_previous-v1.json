@@ -1,0 +1,21 @@
+{
+  "_note": "KNOWN-BAD FIXTURE: the previous release's ledger. X-7 is retracted in the current ledger with no note, and X-8 is simply gone from it.",
+  "rows": [
+    {
+      "id": "X-7", "claim": "the widget never needed a second pass",
+      "category": "capability", "appears_in": [],
+      "rung": "ASSERTED", "required_rung": "PROBED",
+      "evidence": "[UNVERIFIED]", "advancing_probe": "none",
+      "shipping_artifact": "the installed package", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8"
+    },
+    {
+      "id": "X-8", "claim": "the widget ran on every supported platform",
+      "category": "capability", "appears_in": [],
+      "rung": "ASSERTED", "required_rung": "PROBED",
+      "evidence": "[UNVERIFIED]", "advancing_probe": "run the matrix",
+      "shipping_artifact": "the installed package", "last_verified": "2026-08-17",
+      "reverify_days": 30, "owner": "E8"
+    }
+  ]
+}

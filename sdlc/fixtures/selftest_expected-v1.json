@@ -1,0 +1,37 @@
+{
+  "_note": "The exact violation-id set the known-bad fixture must produce. Asserted on IDS, never on a count (ZROS-FORGE v1.1 APPENDIX-V warning 2). Adding a check means adding its seeded case to selftest_known_bad_zros-v1.md and its id here, in the same change.",
+  "_seeding_map": {
+    "V1": "G-M9-01 is CORE with an empty parents array",
+    "V2": "register row I-3 is usable, is nobody's parent, and sits on no ACCEPTED/CALIBRATION line",
+    "V3": "G-M2-01's known_bad fixture passes its own check; G-M6-01's command check was not executed",
+    "V4": "an untagged threshold 0.7 in section 0",
+    "V5": "a YOUR_ placeholder inside a bash-fenced block",
+    "V6": "a destructive rm that is not &&-chained",
+    "V7": "a [MEASURED:] tag whose recorded fragment does not appear in the command's real output",
+    "V8": "a bare count stated in prose with no computation shown",
+    "V9": "exercised by --selftest-meta, which points this machinery at a deliberately wrong expectation",
+    "V10": "a diff that flips fail_closed to false while adding no known-bad fixture",
+    "V11": "CORE gate G-M5-01 exists in the gate file and in no runbook phase",
+    "V12": "LAW 4 cites no gate ids"
+  },
+  "violation_ids": [
+    "V1@G-M9-01",
+    "V2@I-3",
+    "V3@G-M2-01:known_bad",
+    "V3@G-M6-01:command",
+    "V4@L44:0.7",
+    "V4@L88:38",
+    "V5@L112",
+    "V6@L117:destructive-step-not-&&-chained",
+    "V7@echo hello",
+    "V8@L88:38",
+    "V10@fail_closed-flipped-to-false",
+    "V10@fail_closed=true-removed",
+    "V11@G-M5-01:missing",
+    "V12@L21:slogan"
+  ],
+  "checks_that_must_run": [
+    "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12"
+  ],
+  "gate_schema_errors": []
+}
