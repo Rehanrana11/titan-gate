@@ -43,7 +43,7 @@ import os
 import re
 import sys
 
-__version__ = "1"
+__version__ = "2"
 
 RUNGS = ["ASSERTED", "SOURCED", "PROBED", "SHIPPED-PROBED"]
 RUNG_INDEX = {r: i for i, r in enumerate(RUNGS)}
@@ -258,6 +258,23 @@ def cs6_unrowed(rows, ctx):
     if not ctx["artifacts"]:
         return None
     claim_texts = [_norm(r.get("claim", "")) for r in rows]
+    # GOVERNED WIDENING v2 (see the governed-widening log in the README):
+    # two accept channels, both visible, neither a regex loosening.
+    #   1. Markdown heading lines are skipped -- a heading names a section, it
+    #      does not assert a capability.  Fixture: the known-bad shipped README
+    #      fixture ends with a heading full of claim words that must produce
+    #      no finding while line 8's real claim still fires.
+    #   2. accepted_non_claims -- an explicit, per-sentence allowlist carried
+    #      IN THE LEDGER with a reason and an acceptance basis per entry.
+    #      Matching is exact / prefix / 0.8-overlap on normalized text, so an
+    #      entry accepts one sentence shape, not a category.  Skipped hits are
+    #      surfaced as a WARN finding, never silently (no silent caps).
+    accepted_norm = []
+    for a in ctx.get("accepted_non_claims") or []:
+        t = _norm(a.get("text", "")) if isinstance(a, dict) else _norm(a)
+        if t:
+            accepted_norm.append(t)
+    accepted_hits = 0
     for path in ctx["artifacts"]:
         try:
             lines = read_lines(path)
@@ -272,17 +289,29 @@ def cs6_unrowed(rows, ctx):
                 continue
             if in_fence:
                 continue
+            if line.lstrip().startswith("#"):
+                continue                        # heading, not an assertion
             for sentence in _sentences(line):
                 if not CLAIM_SHAPED.search(sentence):
                     continue
                 n = _norm(sentence)
                 if any(_overlaps(n, c) for c in claim_texts):
                     continue
+                if any(n == a or n.startswith(a) or _overlaps(n, a, 0.8)
+                       for a in accepted_norm):
+                    accepted_hits += 1
+                    continue
                 out.append(Finding(
                     "CS6", "%s:%d" % (os.path.basename(path), i + 1), BLOCK,
                     "%s:%d" % (path, i + 1),
                     "claim-shaped sentence in a shipped artifact matches no "
                     "ledger row (R1): %s" % sentence.strip()[:120]))
+    if accepted_hits:
+        out.append(Finding(
+            "CS6", "accepted-non-claims", WARN, "ledger:accepted_non_claims",
+            "%d claim-shaped sentence(s) skipped via the ledger's "
+            "accepted_non_claims list -- review that list when reviewing the "
+            "ledger; an acceptance is a decision, not an absence" % accepted_hits))
     return out
 
 
@@ -438,8 +467,15 @@ def run(ledger_path, opts):
     today = parse_date(opts.today) if opts.today else datetime.date.today()
     if today is None:
         return None, ["--today is not an ISO date: %r" % opts.today]
+    accepted = []
+    try:
+        raw_all = json.loads(read_text(ledger_path))
+        if isinstance(raw_all, dict):
+            accepted = raw_all.get("accepted_non_claims", []) or []
+    except Exception:                               # noqa: BLE001
+        pass                                        # load_ledger already reported
     ctx = {"artifacts": opts.artifact or [], "previous_rows": previous_rows,
-           "today": today}
+           "today": today, "accepted_non_claims": accepted}
     results = []
     for cid, fn, missing_reason in CHECKS:
         try:

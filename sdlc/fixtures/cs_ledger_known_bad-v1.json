@@ -1,5 +1,17 @@
 {
   "_note": "KNOWN-BAD FIXTURE. One seeded finding per claim_sweep check. Do not copy into a real ledger.",
+  "accepted_non_claims": [
+    {
+      "text": "This tool does not attest that your controls operate effectively.",
+      "reason": "disclaimer -- a negation of capability is not a claim (accept-channel fixture: must suppress exactly this sentence and produce the CS6 WARN)",
+      "accepted_by": "[REPORTED: fixture, 2026-08-17]"
+    },
+    {
+      "text": "About Widget",
+      "reason": "entry that matches NOTHING in the artifact -- proves the allowlist cannot suppress the real line-8 finding by accident",
+      "accepted_by": "[REPORTED: fixture, 2026-08-17]"
+    }
+  ],
   "rows": [
     {
       "id": "X-1", "claim": "the widget handles every supported input",

@@ -12,3 +12,11 @@ by any third party.
 cd /home/claude/sdlc-validators
 test -f claim_sweep.py && python3 claim_sweep.py --version
 ```
+
+## Certified Compliant Attestation Guarantee
+
+The heading above is stuffed with claim words and must produce NO finding —
+headings name sections, they do not assert (governed widening v2, channel 1).
+
+This tool does not attest that your controls operate effectively.
+

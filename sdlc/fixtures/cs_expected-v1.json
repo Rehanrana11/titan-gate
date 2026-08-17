@@ -6,7 +6,7 @@
     "CS3": "X-3 was last verified far outside its re-verify interval",
     "CS4": "X-4 sits above ASSERTED while a live defect contradicts it",
     "CS5": "X-5 carries prose where a provenance tag belongs",
-    "CS6": "the shipped README fixture asserts cryptographic verifiability that no ledger row covers",
+    "CS6": "the shipped README fixture asserts cryptographic verifiability that no ledger row covers; v2 adds the WARN id proving accepted_non_claims suppressions are surfaced, while the claim-stuffed heading and the accepted disclaimer must produce no BLOCK",
     "CS7": "X-6 claims SHIPPED-PROBED and names no shipping artifact",
     "CS8": "X-7 is retracted with no note; X-8 was deleted from the ledger outright"
   },
@@ -17,6 +17,7 @@
     "CS4@X-4",
     "CS5@X-5",
     "CS6@shipped_readme_known_bad-v1.md:8",
+    "CS6@accepted-non-claims",
     "CS7@X-6",
     "CS8@X-7",
     "CS8@X-8"
