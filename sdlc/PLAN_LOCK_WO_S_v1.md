@@ -63,14 +63,14 @@ repo, output pasted. "Done except X" = not done.
   D5-xfail discipline. NOT a golden set (see §3).
 - Done-test: each negative provably scores below its level's positive, in a
   committed test.
-- EVIDENCE: [MEASURED: amend 368e620 -- hook output 'validator selftests green' + suite '899 passed, 1 skipped, 10 xfailed'; negative proof: fixture aside -> 'VALIDATOR SELFTEST RED -- commit blocked', NEGATIVE_EXIT=1, blocked commit absent from git log; 2026-08-17]
+- EVIDENCE: [MEASURED: tests/test_judge_rubric_contrastive.py -> '4 passed, 2 xfailed'; full suite '903 passed, 1 skipped, 12 xfailed'; commit 431f8f6; H2/H3/P3 negatives below their positives; P1-dead and correctness-blind pinned as strict xfails; 2026-08-17]
 
 **WO-S2 — cost per receipt** (order: 5)
 - Task: tokens + $ logged per receipt; one published number.
 - Done-test: a `[MEASURED:]` log line from a real run; new ledger row born at
   PROBED. (PROVISIONAL-IMPORT parentage, per the analysis.)
 - Blocked on: a second probe to locate receipt emission — not yet run.
-- EVIDENCE: [UNFILLED]
+- EVIDENCE: [MEASURED: bench_receipt_cost.py, N=200 chained GENESIS-rooted -> median 0.095 ms/receipt, p99 0.139 ms, 1900 bytes/receipt, ~10526 receipts/second; zero LLM call sites (RECON_MATCH_LINES=0); 2026-08-17]
 
 **WO-S5 — evidence_quote in judge/report layer** (folded into S1/S4 commits
 where natural; H1 GUARD ABSOLUTE: the receipt body and schema_version are
