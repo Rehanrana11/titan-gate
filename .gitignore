@@ -15,5 +15,3 @@ mutants/
 .mutmut_cache
 html/
 demo_kit*/
-__pycache__/
-*.pyc
