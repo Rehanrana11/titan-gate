@@ -110,10 +110,15 @@ def _drop_not(tree, target_id):
 
 
 def run_tests(pytest_args, timeout):
-    cmd = [sys.executable, "-m", "pytest", "-x", "-q", "--no-header", "-p",
+    # -B / PYTHONDONTWRITEBYTECODE: .pyc validation is (mtime_seconds, size).
+    # Same-size mutations written within one second reuse stale bytecode and
+    # get falsely reported as SURVIVED.
+    cmd = [sys.executable, "-B", "-m", "pytest", "-x", "-q", "--no-header", "-p",
            "no:cacheprovider"] + pytest_args
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
     try:
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                           env=env)
         return p.returncode, (p.stdout or "")[-400:]
     except subprocess.TimeoutExpired:
         return 124, "TIMEOUT"
@@ -132,7 +137,10 @@ def main():
     # so `-k "canonical or chain"` works without quoting gymnastics.
     pytest_args = list(args.tests) + list(passthrough)
 
-    original = open(args.target, "r", encoding="utf-8").read()
+    # newline="" on BOTH sides: never translate line endings. Without it,
+    # restore() rewrites a CRLF file as LF (or vice versa) and leaves the
+    # target dirty even on a clean exit.
+    original = open(args.target, "r", encoding="utf-8", newline="").read()
     tree = ast.parse(original)
     sites = _sites(tree)
 
@@ -149,7 +157,7 @@ def main():
     shutil.copy2(args.target, backup)
 
     def restore(*_):
-        with open(args.target, "w", encoding="utf-8") as f:
+        with open(args.target, "w", encoding="utf-8", newline="") as f:
             f.write(original)
     signal.signal(signal.SIGINT, lambda *a: (restore(), sys.exit(130)))
 
@@ -157,7 +165,7 @@ def main():
     t0 = time.time()
     try:
         # Baseline: unparsed-but-unmutated must be green, or results are noise.
-        with open(args.target, "w", encoding="utf-8") as f:
+        with open(args.target, "w", encoding="utf-8", newline="") as f:
             f.write(ast.unparse(ast.parse(original)))
         rc, tail = run_tests(pytest_args, args.timeout)
         if rc != 0:
@@ -185,7 +193,7 @@ def main():
                 errored.append((mline, mdesc, repr(e)))
                 continue
 
-            with open(args.target, "w", encoding="utf-8") as f:
+            with open(args.target, "w", encoding="utf-8", newline="") as f:
                 f.write(src)
             rc, tail = run_tests(pytest_args, args.timeout)
             if rc == 0:
