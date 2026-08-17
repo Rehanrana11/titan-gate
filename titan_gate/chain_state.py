@@ -71,14 +71,23 @@ def latest_receipt_hash(receipts_root) -> str:
     for p in paths:
         try:
             r = json.loads(p.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError) as e:
+        except (json.JSONDecodeError, RecursionError, OSError) as e:
             raise ChainStateError(f"unreadable receipt {p}: {e}") from e
+        if not isinstance(r, dict):
+            raise ChainStateError(
+                f"receipt {p} is not a JSON object "
+                f"(got {type(r).__name__})")
         stored = r.get("receipt_hash")
         prev = r.get("prev_receipt_hash")
         if not stored or not prev:
             raise ChainStateError(
                 f"receipt {p} missing receipt_hash/prev_receipt_hash")
-        profiles.add(r.get("schema_version", "receipt_v1"))
+        profile = r.get("schema_version", "receipt_v1")
+        if not isinstance(profile, str):
+            raise ChainStateError(
+                f"receipt {p}: schema_version must be a string, "
+                f"got {type(profile).__name__}")
+        profiles.add(profile)
         if len(profiles) > 1:
             raise ChainStateError(
                 f"mixed profiles in one tree {sorted(profiles)} at {p}: "
