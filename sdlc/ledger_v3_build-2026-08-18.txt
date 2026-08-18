@@ -1,0 +1,5 @@
+V2_ROWS=12 IDS=['CL-1', 'CL-2', 'CL-3', 'CL-4', 'CL-5', 'CL-6', 'CL-7', 'CL-8', 'CL-9', 'CL-10', 'CL-11', 'CL-12']
+V3_ROWS=17 ADDED=5 ['CL-13', 'CL-14', 'CL-15', 'CL-16', 'CL-17'] SKIPPED=0 []
+R4_DIFF v2->v3: rows_added=['CL-13', 'CL-14', 'CL-15', 'CL-16', 'CL-17'] rung_moves=0 (append-only batch; no existing row touched)
+REPLAY_ROW=SKIPPED_NO_SOURCE - the queued replay row has no SPEC/README quote on record; add it when the claiming line is located, never from memory
+LEDGER_V3_BUILD_COMPLETE
