@@ -1,0 +1,81 @@
+claim_sweep v2
+  ledger : claim_ledger-titan-v3.json
+  rows   : 17  (computed, not typed)
+  today  : 2026-08-17
+
+  RUNG CENSUS
+    ASSERTED         9 row(s), 8 of them on an external surface
+    SOURCED          2 row(s), 2 of them on an external surface
+    PROBED           6 row(s), 5 of them on an external surface
+    SHIPPED-PROBED   0 row(s), 0 of them on an external surface
+
+  CHECK  STATUS   COUNT  NOTE
+  CS1    RAN         14  
+  CS2    RAN          0  
+  CS3    RAN          0  
+  CS4    RAN          3  
+  CS5    RAN          0  
+  CS6    RAN          1  
+  CS7    RAN          0  
+  CS8    RAN          0  
+
+  CS1 -- 14 finding(s)
+    [BLOCK] CS1@CL-1
+        row is at ASSERTED but ships on 5 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/README.md:7, titan-gate-public/README.md:9, titan-gate-public/SPEC.md:10, titan-gate-public/SPEC.md:11, PyPI project page (1.0.2)
+    [BLOCK] CS1@CL-2
+        row is at ASSERTED but ships on 3 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at signed proof bundles delivered to third parties, titan-gate-public/README.md SOC2 Alignment section (83-107), titan-gate-public/SPEC.md SOC2 Control Mappings section (171+)
+    [BLOCK] CS1@CL-3
+        row is at PROBED but ships on 3 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at SPEC.md, bundle documentation, acquisition-diligence use case
+    [BLOCK] CS1@CL-5
+        row is at PROBED but ships on 2 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at SPEC.md field table, interoperability promise to second implementers
+    [BLOCK] CS1@CL-8
+        row is at SOURCED but ships on 1 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/README.md:94
+    [BLOCK] CS1@CL-9
+        row is at ASSERTED but ships on 1 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/SPEC.md:113
+    [BLOCK] CS1@CL-10
+        row is at ASSERTED but ships on 1 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/SPEC.md:142 (normative MUST)
+    [BLOCK] CS1@CL-11
+        row is at SOURCED but ships on 2 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/SPEC.md:19, titan-gate-public/SPEC.md:172
+    [BLOCK] CS1@CL-12
+        row is at ASSERTED but ships on 2 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/README.md:7, titan-gate-public/SPEC.md:10
+    [BLOCK] CS1@CL-13
+        row is at PROBED but ships on 1 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at (internal; candidate for README pricing line)
+    [BLOCK] CS1@CL-14
+        row is at PROBED but ships on 1 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at (roadmap WO-17 - internal doc, now stale)
+    [BLOCK] CS1@CL-15
+        row is at ASSERTED but ships on 1 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/SPEC.md field table ([UNVERIFIED: exact line - quote at next SPEC read])
+    [BLOCK] CS1@CL-16
+        row is at ASSERTED but ships on 1 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at titan-gate-public/SPEC.md rule-space section ([UNVERIFIED: exact lines - quote at next SPEC read])
+    [BLOCK] CS1@CL-17
+        row is at ASSERTED but ships on 2 external surface(s) requiring SHIPPED-PROBED -- R2 blocks the release, and S2 says the CLAIM is rewritten down to its rung, never shipped up
+        at action.yml:4 (inside the pasted commit message), (README [UNVERIFIED: whether the claim also appears there])
+
+  CS4 -- 3 finding(s)
+    [BLOCK] CS4@CL-3
+        row sits at PROBED while these live defects contradict it: P17 bundle strips prev_receipt_hash -- R5 pins a contradicted claim at ASSERTED until they are fixed
+        at the exported proof bundle
+    [BLOCK] CS4@CL-4
+        row sits at PROBED while these live defects contradict it: D4/D6 FAIL unreachable per START-HERE and APEX Part V -- R5 pins a contradicted claim at ASSERTED until they are fixed
+        at the installed package's ci_evaluate path
+    [BLOCK] CS4@CL-5
+        row sits at PROBED while these live defects contradict it: SPEC encoding rule still unwritten -- R5 pins a contradicted claim at ASSERTED until they are fixed
+        at the published SPEC.md a second implementer reads
+
+  CS6 -- 1 finding(s)
+    [WARN] CS6@accepted-non-claims
+        5 claim-shaped sentence(s) skipped via the ledger's accepted_non_claims list -- review that list when reviewing the ledger; an acceptance is a decision, not an absence
+        at ledger:accepted_non_claims
+

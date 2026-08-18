@@ -1,0 +1,21 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\rmaso\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\rmaso\01-Projects\titan-gate
+configfile: pyproject.toml
+plugins: anyio-4.10.0, dash-3.2.0, hypothesis-6.165.2, langsmith-0.7.22, asyncio-1.4.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 9 items
+
+tests/test_verdict_fail_is_reachable.py::test_hardcoded_credentials_produce_verdict_fail[password = "hunter2"] PASSED [ 11%]
+tests/test_verdict_fail_is_reachable.py::test_hardcoded_credentials_produce_verdict_fail[api_key = 'sk-live-abc123'] PASSED [ 22%]
+tests/test_verdict_fail_is_reachable.py::test_hardcoded_credentials_produce_verdict_fail[SECRET = "topsecret"] PASSED [ 33%]
+tests/test_verdict_fail_is_reachable.py::test_fail_survives_an_above_threshold_composite PASSED [ 44%]
+tests/test_verdict_fail_is_reachable.py::test_missing_error_handling_on_a_long_artifact_fails PASSED [ 55%]
+tests/test_verdict_fail_is_reachable.py::test_clean_artifact_still_passes PASSED [ 66%]
+tests/test_verdict_fail_is_reachable.py::test_d5_input_matches_no_rule_and_therefore_passes PASSED [ 77%]
+tests/test_verdict_fail_is_reachable.py::test_dynamic_eval_should_be_a_hard_violation XFAIL [ 88%]
+tests/test_verdict_fail_is_reachable.py::test_short_artifact_is_not_exempt_from_error_handling XFAIL [100%]
+
+======================== 7 passed, 2 xfailed in 0.62s =========================
