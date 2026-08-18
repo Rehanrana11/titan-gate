@@ -1,0 +1,13 @@
+{
+  "_note": "Exact finding id|verdict pairs the known-bad registry must produce against the mock repo. Asserted on ids, never on a count. Adding a check kind means seeding its case and its id here in the same change.",
+  "finding_ids": [
+    "IX-1@ok|OK",
+    "IX-2@source|DRIFT",
+    "IX-3@mirror1:spec.md|DRIFT-TRACKED",
+    "IX-4@tracking|DRIFT",
+    "IX-5@tracking|DRIFT",
+    "IX-6@declaration|UNENFORCED",
+    "IX-7@source|NOT_RUN",
+    "IX-8@source|DRIFT"
+  ]
+}

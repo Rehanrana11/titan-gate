@@ -1,0 +1,175 @@
+{
+  "_registry": "titan-gate invariant registry v1 (2026-08-17)",
+  "_purpose": "One authoritative source per product truth; every restatement is a checked mirror. Parent incident classes: stale-copy #13, inherited figures #3, five inconsistent SOC2 tables, SPEC 32-vs-33 fields, SPEC silent on encoding.",
+  "_provenance_note": "Rows marked [QUOTED: engine.py read] come from the operator-pasted engine source, 2026-08-17. Rows marked [REPORTED: roadmap] come from TITAN_GATE_MASTER_ROADMAP.docx (March 2026, five months stale) and are seeded for the SWEEP to verify -- the registry does not inherit the roadmap's facts, it puts them on trial.",
+  "_amendment_rule": "Removing or loosening a row requires a reason line in the row's own 'retired' field, kept in place -- silent deletion of an invariant is a stale-copy incident waiting to recur.",
+  "rows": [
+    {
+      "id": "IV-1",
+      "invariant": "SIGNING_VERSION is hmac-sha256-v1 until W8 introduces a new versioned default; the constant changes only by new version, never by mutation",
+      "value": "hmac-sha256-v1",
+      "change_trigger": "NEVER -- new version constant only (roadmap section 7 rule, adopted)",
+      "violation_response": "version mismatch anomaly; all signing claims re-rung",
+      "provenance": "[QUOTED: claude/START-HERE-titan-gate.md P15; engine.py imports SIGNING_VERSION from api.constants]",
+      "tracked_by": "CL-1",
+      "check": {"kind": "constant", "file": "api/constants.py", "name": "SIGNING_VERSION", "expected": "hmac-sha256-v1"},
+      "mirrors": [
+        {"file": "../titan-gate-public/SPEC.md", "pattern": "hmac-sha256-v1", "expect": "present", "note": "SPEC must name the default profile it actually ships"}
+      ]
+    },
+    {
+      "id": "IV-2",
+      "invariant": "Merkle algorithm is merkle_v1: leaf = SHA256('L|'+data), node = SHA256('N|'+left+right)",
+      "value": "merkle_v1",
+      "change_trigger": "NEVER -- new version only",
+      "violation_response": "CRITICAL_LEDGER_ANOMALY (roadmap section 2 taxonomy, adopted)",
+      "provenance": "[REPORTED: roadmap sections 2 and 8 -- on trial, not inherited]",
+      "check": {"kind": "constant", "file": "api/constants.py", "name": "MERKLE_ALGORITHM", "expected": "merkle_v1"},
+      "mirrors": [
+        {"file": "api/merkle.py", "pattern": "L\\|", "expect": "present", "note": "leaf domain-separation prefix"},
+        {"file": "api/merkle.py", "pattern": "N\\|", "expect": "present", "note": "node domain-separation prefix"}
+      ]
+    },
+    {
+      "id": "IV-3",
+      "invariant": "Composite weights are structural 0.6 / semantic 0.4, and any change bumps SCORING_FORMULA_VERSION in the same commit",
+      "value": "0.6/0.4",
+      "change_trigger": "SCORING_FORMULA_VERSION bump (H1 discipline)",
+      "violation_response": "version mismatch anomaly",
+      "provenance": "[QUOTED: engine.py read 2026-08-17 -- STRUCTURAL_WEIGHT = 0.6, SEMANTIC_WEIGHT = 0.4]",
+      "check": {"kind": "grep", "file": "judge_engine/v1/engine.py", "pattern": "STRUCTURAL_WEIGHT\\s*=\\s*0\\.6", "expect": "present"},
+      "mirrors": [
+        {"file": "judge_engine/v1/engine.py", "pattern": "SEMANTIC_WEIGHT\\s*=\\s*0\\.4", "expect": "present"}
+      ]
+    },
+    {
+      "id": "IV-4",
+      "invariant": "SCORE_PASS is 0.7; the roadmap's claimed WARN threshold 0.40 is unverified and this row exists to measure it, not to trust it",
+      "value": "0.7",
+      "change_trigger": "SCORING_FORMULA_VERSION bump",
+      "violation_response": "version mismatch anomaly",
+      "provenance": "[QUOTED: claude/session-2026-08-17-state.md SCORE_PASS 0.7] + [REPORTED: roadmap 'WARN >= 0.40' -- UNVERIFIED]",
+      "check": {"kind": "constant", "file": "api/constants.py", "name": "SCORE_PASS", "expected": "0.7"}
+    },
+    {
+      "id": "IV-5",
+      "invariant": "receipt_v1 is byte-frozen: any receipt field change requires schema_version v2 AND CONTRACT_VERSION 1.1.0 with dual-version verify (H1)",
+      "value": "receipt_v1",
+      "change_trigger": "H1 -- coupled version bumps, never in-place mutation",
+      "violation_response": "hard block; the frozen schema is the product",
+      "provenance": "[QUOTED: claude/START-HERE-titan-gate.md H1; engine.py emits schema_version receipt_v1]",
+      "check": {"kind": "grep", "file": "judge_engine/v1/engine.py", "pattern": "\"schema_version\":\\s*\"receipt_v1\"", "expect": "present"}
+    },
+    {
+      "id": "IV-6",
+      "invariant": "Canonical bytes are UTF-8 with non-ASCII emitted literally; SPEC.md must state this or a second implementer coin-flips",
+      "value": "utf-8, ensure_ascii=False",
+      "change_trigger": "new canonicalization version only",
+      "violation_response": "cross-implementation verifier rejects valid receipts",
+      "provenance": "[QUOTED: claude/session-2026-08-17-state.md canonical.py survivor analysis]",
+      "tracked_by": "CL-5",
+      "check": {"kind": "grep", "file": "titan_gate/canonical.py", "pattern": "ensure_ascii=False", "expect": "present"},
+      "mirrors": [
+        {"file": "../titan-gate-public/SPEC.md", "pattern": "UTF-8", "expect": "present", "note": "the STILL-UNWRITTEN sentence; expected DRIFT-TRACKED via CL-5 until written"}
+      ]
+    },
+    {
+      "id": "IV-7",
+      "invariant": "The SPEC field table documents every wire field; soc2_controls is on the wire and must be in the table",
+      "value": "documented fields == wire fields",
+      "change_trigger": "field-table edit in the same commit as any wire change",
+      "violation_response": "spec-vs-wire drift; CL-11 class",
+      "provenance": "[QUOTED: claude/session-2026-08-17-state.md '32 documented; 33 on the wire']",
+      "tracked_by": "CL-11",
+      "check": {"kind": "grep", "file": "judge_engine/v1/engine.py", "pattern": "\"soc2_controls\"", "expect": "present"},
+      "mirrors": [
+        {"file": "../titan-gate-public/SPEC.md", "pattern": "soc2_controls", "expect": "present", "note": "expected DRIFT-TRACKED via CL-11 until the field table is fixed"}
+      ]
+    },
+    {
+      "id": "IV-8",
+      "invariant": "prev_receipt_hash survives into every exported artifact a third party receives; a chain the bundle strips does not exist for the consumer",
+      "value": "prev_receipt_hash in receipt AND bundle",
+      "change_trigger": "bundle schema version bump only",
+      "violation_response": "chain broken -- anomaly raised (roadmap taxonomy)",
+      "provenance": "[QUOTED: claude/START-HERE-titan-gate.md P17]",
+      "tracked_by": "CL-3",
+      "check": {"kind": "grep", "file": "judge_engine/v1/engine.py", "pattern": "\"prev_receipt_hash\"", "expect": "present"},
+      "mirrors": [
+        {"file": "scripts/generate_proof_bundle.py", "pattern": "prev_receipt_hash", "expect": "present", "note": "expected DRIFT-TRACKED via CL-3 until W7 lands"}
+      ]
+    },
+    {
+      "id": "IV-9",
+      "invariant": "NO SILENT FALLBACK KEY: absent TITAN_SIGNING_KEY the action must refuse to sign, never sign with a zero/default key",
+      "value": "refuse, never default",
+      "change_trigger": "never",
+      "violation_response": "security violation -- receipts signed with a known key are forgeries with extra steps",
+      "provenance": "[REPORTED: roadmap WO-17 'Without this, the GitHub Action silently uses the zero key' -- status in the SHIPPED action is UNVERIFIED and this is the registry's most urgent open probe]",
+      "check": {"kind": "declaration", "suggested_probe": "read action.yml + scripts/ci_evaluate.py key-fallback path; run the action with no secret set and assert non-zero exit with no receipt emitted"}
+    },
+    {
+      "id": "IV-10",
+      "invariant": "NO SILENT DEFAULT SCORE: an exception inside any judge yields an abstention token, never a number",
+      "value": "INSUFFICIENT_CONTEXT",
+      "change_trigger": "never",
+      "violation_response": "a silent default inside a scoring instrument (M4)",
+      "provenance": "[MEASURED: WO-S1 landed 2026-08-17; suite 899 passed with the token guard]",
+      "check": {"kind": "grep", "file": "judge_engine/v1/semantic_judge.py", "pattern": "INSUFFICIENT_CONTEXT", "expect": "present"},
+      "mirrors": [
+        {"file": "tests/test_semantic_judge_abstention.py", "pattern": "INSUFFICIENT_CONTEXT", "expect": "present", "note": "the guard test that keeps it dead"}
+      ]
+    },
+    {
+      "id": "IV-11",
+      "invariant": "Attribution fields are computed or absent, never hardcoded: ai_attributed must not be a literal False in a product about AI-assisted code",
+      "value": "computed-or-absent",
+      "change_trigger": "W2",
+      "violation_response": "the receipt asserts a fact nobody measured",
+      "provenance": "[QUOTED: engine.py read 2026-08-17 -- '\"ai_attributed\": False' hardcoded]",
+      "check": {"kind": "grep", "file": "judge_engine/v1/engine.py", "pattern": "\"ai_attributed\":\\s*False", "expect": "absent"}
+    },
+    {
+      "id": "IV-12",
+      "invariant": "Replay is byte-identical with zero drift tolerance; any mismatch is a structured anomaly, and the property carries a probe",
+      "value": "byte-identical replay",
+      "change_trigger": "replay engine version only",
+      "violation_response": "structured anomaly on any mismatch",
+      "provenance": "[REPORTED: roadmap Layer 4 -- no probe on record touches replay; proposed ledger row in the v3 batch]",
+      "check": {"kind": "declaration", "suggested_probe": "evaluate the same artifact twice through api/replay and byte-compare the receipts; then once more after a dependency bump"}
+    },
+    {
+      "id": "IV-13",
+      "invariant": "Sealed daily Merkle roots are immutable once promoted; anchors follow pending -> promoted and are never overwritten",
+      "value": "seal-once",
+      "change_trigger": "never",
+      "violation_response": "CRITICAL_LEDGER_ANOMALY",
+      "provenance": "[REPORTED: roadmap sections 2 and 8 Layer 5] + [QUOTED: CL-9 -- zero probes on record touch sealing]",
+      "tracked_by": "CL-9",
+      "check": {"kind": "declaration", "suggested_probe": "seal a root, mutate one sealed entry byte, assert verification fails on the exported artifact; attempt re-seal and assert rejection"}
+    },
+    {
+      "id": "IV-14",
+      "invariant": "Every DB query is tenant-scoped; cross-tenant access is a hard block",
+      "value": "tenant_id in all queries",
+      "change_trigger": "never",
+      "violation_response": "hard block -- never leak",
+      "provenance": "[REPORTED: roadmap section 2 -- UNVERIFIED against current code]",
+      "check": {"kind": "declaration", "suggested_probe": "grep DB query sites for tenant_id; one adversarial cross-tenant request against /evaluate"}
+    },
+    {
+      "id": "IV-15",
+      "invariant": "The four logic-version constants exist and bump on their triggers: ENGINE_VERSION, CONTRACT_VERSION, SCORING_FORMULA_VERSION, POLICY_VERSION",
+      "value": "constants present, coupled to H1",
+      "change_trigger": "per-constant triggers (roadmap section 7 table, adopted as shape)",
+      "violation_response": "version mismatch anomaly",
+      "provenance": "[QUOTED: engine.py read -- all four imported from api.constants]",
+      "check": {"kind": "grep", "file": "api/constants.py", "pattern": "ENGINE_VERSION", "expect": "present"},
+      "mirrors": [
+        {"file": "api/constants.py", "pattern": "CONTRACT_VERSION", "expect": "present"},
+        {"file": "api/constants.py", "pattern": "SCORING_FORMULA_VERSION", "expect": "present"},
+        {"file": "api/constants.py", "pattern": "POLICY_VERSION", "expect": "present"}
+      ]
+    }
+  ]
+}

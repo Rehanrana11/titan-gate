@@ -1,0 +1,13 @@
+{
+  "_note": "DELIBERATELY WRONG - used only by --selftest-meta. Do not fix.",
+  "finding_ids": [
+    "IX-1@ok|OK",
+    "IX-2@source|DRIFT",
+    "IX-3@mirror1:spec.md|DRIFT-TRACKED",
+    "IX-4@tracking|DRIFT",
+    "IX-5@tracking|DRIFT",
+    "IX-6@declaration|UNENFORCED",
+    "IX-7@source|NOT_RUN",
+    "IX-99@nowhere|DRIFT"
+  ]
+}

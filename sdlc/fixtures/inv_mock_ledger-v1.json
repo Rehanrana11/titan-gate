@@ -1,0 +1,10 @@
+{"rows": [
+  {"id": "CL-GOOD", "claim": "tracked drift owner", "appears_in": [], "rung": "ASSERTED",
+   "required_rung": "PROBED", "category": "internal", "evidence": "[UNVERIFIED]",
+   "advancing_probe": "none", "shipping_artifact": "none", "last_verified": "2026-08-17",
+   "reverify_days": 30, "owner": "E8"},
+  {"id": "CL-DEAD", "claim": "retracted owner", "appears_in": [], "rung": "ASSERTED",
+   "required_rung": "PROBED", "category": "internal", "evidence": "[UNVERIFIED]",
+   "advancing_probe": "none", "shipping_artifact": "none", "last_verified": "2026-08-17",
+   "reverify_days": 30, "owner": "E8", "retracted": true}
+]}
