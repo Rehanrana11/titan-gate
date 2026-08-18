@@ -138,11 +138,12 @@
       "last_verified": "2026-08-18",
       "reverify_days": 14,
       "owner": "E8",
-      "pinned_by": [
-        "D4/D6 FAIL unreachable per START-HERE and APEX Part V"
-      ],
+      "pinned_by": [],
       "work_order": "W4 verdict reachable-or-removed",
-      "AMBIGUITY_RESOLVED_2026-08-18": "session-2026-08-17-state.md says W4 RESOLVED (FAIL reachable, verdict table shown); START-HERE and APEX Part V, both written later, restate FAIL-unreachable. Resolve by running classify() on the shipped path, never by picking a document."
+      "AMBIGUITY_RESOLVED_2026-08-18": "session-2026-08-17-state.md says W4 RESOLVED (FAIL reachable, verdict table shown); START-HERE and APEX Part V, both written later, restate FAIL-unreachable. Resolve by running classify() on the shipped path, never by picking a document.",
+      "pins_cleared": [
+        "2026-08-18: ['D4/D6 FAIL unreachable per START-HERE and APEX Part V'] cleared  START-HERE finding 4 and APEX Part V CL-4 amended to the two-path W4 resolution (project docs, amendment A1); contradiction no longer exists in the named sources. Evidence: tests/test_verdict_fail_is_reachable.py '7 passed, 2 xfailed', commit 13480fa."
+      ]
     },
     {
       "id": "CL-5",
