@@ -1,0 +1,613 @@
+{
+ "version": "1",
+ "anti_scope": [
+  {
+   "tag": "golden-set-before-parser",
+   "rule": "a golden set labelled on a broken parser bakes the bug into the labels permanently",
+   "unlocked_by": "R22"
+  },
+  {
+   "tag": "depth-before-extractor",
+   "rule": "engines/prompts before the extractor is fixed buys precision, not accuracy [QUOTED: TRUSTFORGE refusals]",
+   "unlocked_by": "R22"
+  },
+  {
+   "tag": "export-before-clean",
+   "rule": "export amplifies whatever is in the report; it does not clean it",
+   "unlocked_by": "R22"
+  },
+  {
+   "tag": "reweight-before-ss-redesign",
+   "rule": "tuning weights on a degenerate basis does not transfer",
+   "unlocked_by": "R21"
+  },
+  {
+   "tag": "new-flagship-before-honest-claims",
+   "rule": "no new flagship until shipped claims are true (SWOT W4)",
+   "unlocked_by": "R14"
+  }
+ ],
+ "fixes": [
+  {
+   "id": "R01",
+   "title": "commit battery-run-v4 + pin SUMMARY clock",
+   "closes": [
+    "A4"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "aivis repo, committed",
+   "accept": "git log --oneline -1 -- battery-run-v4.jsonl",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R02",
+   "title": "withdraw rank_score from customer artifact",
+   "closes": [
+    "D3"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "customer PDF + external surfaces",
+   "accept": "grep -c rank_score data/reports/*.txt == 0",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R03",
+   "title": "read evidence-verify; open CL-22",
+   "closes": [
+    "A7"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "claim_ledger-titan-v4.json",
+   "accept": "claim_sweep shows CL-22 rowed",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R04",
+   "title": "re-measure titan suite; re-advance CL-6",
+   "closes": [
+    "CL6"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "claim ledger row CL-6",
+   "accept": "claim_sweep BLOCKS back to 16, CS3=0",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R05",
+   "title": "supersede 2 dead ai-visibility-audit repos by description",
+   "closes": [
+    "C1"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "github repo descriptions",
+   "accept": "gh repo view shows SUPERSEDED",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R06",
+   "title": "seed install_ledger into repo; install_gate in boot ritual",
+   "closes": [
+    "B4",
+    "C2"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "sdlc/install_ledger-titan-v1.json",
+   "accept": "install_gate check runs at session start",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R07",
+   "title": "probe_lib_v0_2.sh: computed STATUS + ls -A",
+   "closes": [
+    "B2",
+    "E2"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "every probe block issued",
+   "accept": "tg_ls on a <50 dir prints STATUS=COMPLETE",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R08",
+   "title": "GATES v2: counter-noun rule, hash-guard, T7, name collision",
+   "closes": [
+    "C3",
+    "MYCOUNT"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "claude_GATES-v2.md + validate_gates",
+   "accept": "PROSE-DEBT count reads 7; linter fires on a bare count",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R09",
+   "title": "repair_gate + repair_queue into repo",
+   "closes": [
+    "RQ0"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "sdlc/repair_gate_v0_1.py",
+   "accept": "selftest + selftest-meta exit 0 at destination",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R10",
+   "title": "W8 ed25519 default + 1.0.3 verifier + publish SPEC-2",
+   "closes": [
+    "A2",
+    "C4",
+    "C5",
+    "D2"
+   ],
+   "depends_on": [],
+   "phase": 1,
+   "destination": "PyPI titan-gate 1.0.3 + public SPEC.md",
+   "accept": "clean venv: verify ed25519 receipt with public key only; forge attempt fails",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R11",
+   "title": "W1 policy_judge reads the artifact; one SOC 2 table",
+   "closes": [
+    "D1",
+    "C6"
+   ],
+   "depends_on": [],
+   "phase": 1,
+   "destination": "shipped attestations",
+   "accept": "empty file -> not PASS, controls not attested",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R12",
+   "title": "W7 bundle carries prev_receipt_hash",
+   "closes": [
+    "CL3"
+   ],
+   "depends_on": [],
+   "phase": 1,
+   "destination": "the exported proof bundle",
+   "accept": "chain verifies from the bundle a third party receives",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R13",
+   "title": "W2/W6 ai_attributed wired; empty dirs populated or removed",
+   "closes": [
+    "D5",
+    "D6"
+   ],
+   "depends_on": [],
+   "phase": 1,
+   "destination": "the shipped package",
+   "accept": "receipt shows a real ai_attributed; no empty claiming dirs",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R14",
+   "title": "W9 tagged release from the shipping repo",
+   "closes": [
+    "D4",
+    "CL20"
+   ],
+   "depends_on": [
+    "R10",
+    "R11",
+    "R12",
+    "R13"
+   ],
+   "phase": 1,
+   "destination": "github tags + PyPI",
+   "accept": "git tag -l shows v1.0.3 and v1",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R20",
+   "title": "register_append.py, idempotent",
+   "closes": [
+    "A8",
+    "E3",
+    "E4"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "claude/titan-incident-register.md",
+   "accept": "install_gate debt FINDINGS=0; second run is a no-op",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R21",
+   "title": "CAAI v2.1: intervals, tier cap, floors, valid_until branch, SS redesign",
+   "closes": [
+    "D7"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "caai_v2_1_scorer.py",
+   "accept": "index_gate BLOCK violations fall; I5 and I4-DIM-RENORM silent",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R22",
+   "title": "fix extract_domains (D4 parser defect)",
+   "closes": [
+    "PARSER"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "src/aivis/parser.py",
+   "accept": "'Monday.com' brand yields no citation domain",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R23",
+   "title": "top-3 extractor: top3/mentions with n_min floor",
+   "closes": [
+    "DSGAP"
+   ],
+   "depends_on": [
+    "R22"
+   ],
+   "phase": 2,
+   "destination": "per-row JSONL + DS dimension",
+   "accept": "DS computable; abstains below n_min",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R24",
+   "title": "OpenAI engine adapter",
+   "closes": [
+    "ENG2"
+   ],
+   "depends_on": [
+    "R22"
+   ],
+   "phase": 2,
+   "destination": "runner.py multi-engine path",
+   "accept": "a live OpenAI row lands in the JSONL",
+   "anti_scope_tags": [
+    "depth-before-extractor"
+   ],
+   "status": "blocked"
+  },
+  {
+   "id": "R25",
+   "title": "Grok (xAI) engine adapter",
+   "closes": [
+    "ENG3"
+   ],
+   "depends_on": [
+    "R22"
+   ],
+   "phase": 2,
+   "destination": "runner.py multi-engine path",
+   "accept": "a live Grok row lands in the JSONL",
+   "anti_scope_tags": [
+    "depth-before-extractor"
+   ],
+   "status": "blocked"
+  },
+  {
+   "id": "R26",
+   "title": "obtain OpenAI + xAI API keys",
+   "closes": [
+    "KEYS"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": ".env",
+   "accept": "ENV_KEYS shows three keys",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R27",
+   "title": "port CAAI v2.1 scorer into the shipping scorer path",
+   "closes": [
+    "A1"
+   ],
+   "depends_on": [
+    "R21",
+    "R23"
+   ],
+   "phase": 2,
+   "destination": "src/aivis/scorer.py",
+   "accept": "aivis emits a 5-dimension CAAI with intervals",
+   "anti_scope_tags": [
+    "reweight-before-ss-redesign"
+   ],
+   "status": "blocked"
+  },
+  {
+   "id": "R28",
+   "title": "export the evidence trail into the customer artifact",
+   "closes": [
+    "A5"
+   ],
+   "depends_on": [
+    "R22"
+   ],
+   "phase": 2,
+   "destination": "data/reports/*.pdf",
+   "accept": "battery V moves 0 -> 2 without --jsonl-is-deliverable",
+   "anti_scope_tags": [
+    "export-before-clean"
+   ],
+   "status": "blocked"
+  },
+  {
+   "id": "R29",
+   "title": "report renderer: KPI tiles, per-engine tables, honest footer",
+   "closes": [
+    "RENDER",
+    "B7"
+   ],
+   "depends_on": [
+    "R27"
+   ],
+   "phase": 2,
+   "destination": "the delivered PDF",
+   "accept": "a 5-section PDF renders; footer claims match rungs",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R30",
+   "title": "cross-prompt persistence aggregator",
+   "closes": [
+    "PERSIST"
+   ],
+   "depends_on": [
+    "R23"
+   ],
+   "phase": 2,
+   "destination": "report section 4",
+   "accept": "per-family x brand table reproduces from JSONL",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R31",
+   "title": "caai_claim_gate.py with G4 reinstated as a fixture",
+   "closes": [
+    "B1"
+   ],
+   "depends_on": [
+    "R21"
+   ],
+   "phase": 2,
+   "destination": "caai_claim_gate.py",
+   "accept": "selftest + selftest-meta exit 0; G4 fires on the published weights",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R32",
+   "title": "timeboxed search for the original CAAI renderer",
+   "closes": [
+    "A6"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "a repo, or a written declaration of loss",
+   "accept": "one session, then declared irrecoverable",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R33",
+   "title": "reporter.py: PCOS title + ln[:120] truncation",
+   "closes": [
+    "B6"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "the customer PDF",
+   "accept": "title names the right product; no silent truncation",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R34",
+   "title": "charter file replaced with Instructions-field text",
+   "closes": [
+    "C8"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "claude/PROJECT-INSTRUCTIONS.md",
+   "accept": "dedup lint CLEAN; SUPERSESSION row 4 retired",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R35",
+   "title": "supersession markers on Downloads duplicate groups",
+   "closes": [
+    "C7",
+    "B5"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "~/Downloads",
+   "accept": "validate_gates dedup CLEAN",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R36",
+   "title": "operator names the one canonical product repo",
+   "closes": [
+    "A3"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "a written decision in the state doc",
+   "accept": "install_gate IG-05 DUP-JOB = 0",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R37",
+   "title": "T6 mining auto-invocation",
+   "closes": [
+    "F5"
+   ],
+   "depends_on": [],
+   "phase": 2,
+   "destination": "session close ritual",
+   "accept": "PROSE-DEBT reaches 0",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R40",
+   "title": "E-01: one >=15-exchange coding session under GATES, mined",
+   "closes": [
+    "F1"
+   ],
+   "depends_on": [
+    "R08"
+   ],
+   "phase": 3,
+   "destination": "a rework report scored vs 29/38",
+   "accept": "rework % MEASURED on a comparable session",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R41",
+   "title": "M7 anchored judge, >=80% agreement on 10 hand-scored",
+   "closes": [
+    "F2"
+   ],
+   "depends_on": [],
+   "phase": 3,
+   "destination": "judge_engine/v1/",
+   "accept": "agreement published before the judge is trusted",
+   "anti_scope_tags": [],
+   "status": "ready"
+  },
+  {
+   "id": "R42",
+   "title": "wire all selftests into pre-commit",
+   "closes": [
+    "E1"
+   ],
+   "depends_on": [
+    "R06",
+    "R09"
+   ],
+   "phase": 3,
+   "destination": "every commit",
+   "accept": "a seeded selftest failure blocks a commit",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R43",
+   "title": "golden set 15/5/5, hand-labelled",
+   "closes": [
+    "F4"
+   ],
+   "depends_on": [
+    "R22"
+   ],
+   "phase": 3,
+   "destination": "golden/golden_set_v1.jsonl",
+   "accept": "100 rows, 0 AI-labelled",
+   "anti_scope_tags": [
+    "golden-set-before-parser"
+   ],
+   "status": "blocked"
+  },
+  {
+   "id": "R44",
+   "title": "rank rotation (M12) then validate or withdraw rank",
+   "closes": [
+    "ROT"
+   ],
+   "depends_on": [
+    "R24",
+    "R25"
+   ],
+   "phase": 3,
+   "destination": "customer rank claims",
+   "accept": "rotation variance published",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R45",
+   "title": "re-run the CAAI benchmark: 30 prompts x 3 engines",
+   "closes": [
+    "REPORT"
+   ],
+   "depends_on": [
+    "R26",
+    "R24",
+    "R25",
+    "R27",
+    "R29"
+   ],
+   "phase": 3,
+   "destination": "the delivered report",
+   "accept": "a 5-dimension report whose numbers reproduce",
+   "anti_scope_tags": [],
+   "status": "blocked"
+  },
+  {
+   "id": "R50",
+   "title": "RULING: B3 (W8 plan v1) correctly superseded \u2014 no action",
+   "closes": [
+    "B3"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "claude/W8-PLAN-ed25519-default-v1.md (stub already in place)",
+   "accept": "head -3 shows the SUPERSEDED header and its reason",
+   "anti_scope_tags": [],
+   "status": "done"
+  },
+  {
+   "id": "R51",
+   "title": "RULING: F3 (PROMPTGATE) correctly sequenced, not diluted \u2014 strike from the count",
+   "closes": [
+    "F3"
+   ],
+   "depends_on": [],
+   "phase": 0,
+   "destination": "claude/value-dilution-register v2, class F reduced",
+   "accept": "register v2 records 38 standing events with the reclassification logged",
+   "anti_scope_tags": [],
+   "status": "done"
+  }
+ ]
+}
