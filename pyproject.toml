@@ -9,7 +9,7 @@ description = "Cryptographic receipt verification for AI-assisted code changes"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [{name = "Rehan Masood", email = "rmasoodx22@gmail.com"}]
-keywords = ["cryptography", "audit", "SOC2", "AI", "verification", "receipts", "compliance"]
+keywords = ["cryptography", "audit", "SOC2", "AI", "verification", "receipts"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",

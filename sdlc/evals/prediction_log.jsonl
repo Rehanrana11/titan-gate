@@ -4,5 +4,5 @@
 {"id": 4, "date": "2026-08-17", "question": "does parse_success return True when parse_errors is non-empty?", "prediction": "yes", "actual": "yes", "surprised": false}
 {"id": 5, "date": "2026-08-17", "question": "how many receipts exist with a real external counterparty?", "prediction": "0", "actual": "0", "surprised": false}
 {"id": 6, "date": "2026-08-17", "question": "will structural_judge distinguish a+b from a-b?", "prediction": "no", "actual": "no", "surprised": false}
-{"id": 7, "date": "2026-08-17", "question": "empty artifact: verdict, composite, and how many soc2 controls satisfied?", "prediction": "PASS, 0.88, all", "actual": "", "surprised": null}
-{"id": 8, "date": "2026-08-17", "question": "how many distinct composite scores across D4's 10 inputs?", "prediction": "4", "actual": "", "surprised": null}
+{"id": 7, "date": "2026-08-17", "question": "empty artifact: verdict, composite, and how many soc2 controls satisfied?", "prediction": "PASS, 0.88, all", "actual": "PASS, 0.88, 5 of 5 satisfied (pre-W1 tree c9092af)", "surprised": false}
+{"id": 8, "date": "2026-08-17", "question": "how many distinct composite scores across D4's 10 inputs?", "prediction": "4", "actual": "6 distinct: 0.858 0.86 0.866 0.88 0.896 0.912", "surprised": true}

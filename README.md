@@ -54,7 +54,8 @@ Titan Gate answers that question with cryptographic receipts -- not process docs
 - **Chained** -- each receipt links to the previous via `prev_receipt_hash`
 - **Tamper-evident** -- HMAC-SHA256 signature detects any modification
 - **Auditable** -- receipts travel with the repo at `.titan/receipts/`
-- **SOC2-aligned** -- maps directly to CC6, CC7, CC8 controls
+- **Control-mapped** -- three static pattern checks, each mapped to named
+  SOC 2 criteria. A mapping, not an audit and not an attestation.
 
 ---
 
@@ -98,15 +99,24 @@ titan-verify .titan/receipts/receipt.json --key $TITAN_SIGNING_KEY
 
 ---
 
-## SOC2 Coverage
+## SOC 2 Control Mapping
 
-| Control | Coverage |
-|---------|----------|
-| CC6.1 | Logical access -- tenant isolation on all queries |
-| CC6.7 | Change management -- signed receipt on every PR |
-| CC7.1 | Anomaly detection -- tamper detection raises structured anomalies |
-| CC7.2 | Monitoring -- evaluation manifest records all version constants |
-| CC8.1 | Change control -- PASS/WARN/FAIL gate on every PR |
+Titan Gate runs **three static pattern checks** and records which SOC 2 Trust
+Services Criteria each one names. This is a mapping, not coverage, and not an
+attestation. See `docs/SPEC.md` erratum E-2.
+
+| Check | Mechanism | Criteria named |
+|-------|-----------|----------------|
+| Hardcoded credentials | regex on `password`/`secret`/`api_key` assignment | CC6.1, CC6.2 |
+| Missing error handling | no `try`/`except` in artifacts over 200 chars | CC7.1 |
+| Missing type hints | `def` without `->` | CC8.1 |
+
+**Not implemented.** CC6.7 has no check and never had one; earlier revisions of
+this table listed it. CC7.2 has no check either -- no rule can report it
+violated. CC6.2 is emitted on every receipt and was missing from this table.
+
+A passing receipt means these three checks did not fire. It does not mean the
+change is compliant.
 
 ---
 
