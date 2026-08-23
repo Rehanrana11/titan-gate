@@ -187,3 +187,16 @@ HMAC comparison MUST use constant-time equality (hmac.compare_digest in Python)
 TRS-1 v1.0.0 — Titan Receipt Standard
 Author: Rehan Masood — https://github.com/Rehanrana11/titan-gate
 License: CC BY 4.0
+## Errata - 2026-08-19
+
+E-1 (Abstract). "TRS-1 receipts are independently verifiable by any party with
+access to the receipt file and the verification key."
+
+Correction: on `hmac-sha256-v1`, the shipped default signing version in 1.0.2,
+the signing key and the verification key are the same symmetric secret. A party
+able to verify a receipt is therefore also able to produce one. Verification on
+that path is offline and tamper-evident, but it is NOT independent of the signer.
+Independent verification requires an asymmetric signing version (`ed25519-v1`),
+which exists in the implementation and is not the default as of 1.0.2.
+
+This erratum does not modify TRS-1 v1.0.0, which is frozen.
