@@ -11,8 +11,8 @@ titan_gate/chain_state.py:78-82 forbids mixed profiles in one chain, so the
 tri-state fix lands in receipt_trs2_v2, not here. These tests hold the line
 until it does.
 
-Every xfail below is strict: when the tri-state judge is wired in, each one
-XPASSes and goes RED, and must be converted to a plain assertion in that commit.
+W1 LANDED: the four xfails below were converted to plain assertions in the
+commit that wired in the tri-state judge, exactly as this docstring required.
 """
 import os
 import sys
@@ -66,11 +66,8 @@ def test_violations_still_mark_their_controls():
     assert not _claims_satisfied(_by_id(P.evaluate("", {}, hard, []))["CC6.1"])
 
 
-# --- pinned defects: strict xfail, convert when TRS-2 lands ----------------
+# --- W1 LANDED: these four were strict xfails; converted on the tri-state commit
 
-@pytest.mark.xfail(strict=True, reason=(
-    "BUG (D3): an empty artifact reports 5/5 controls satisfied. No check ran. "
-    "Fix lands in receipt_trs2_v2 -- convert to a plain assert in that commit."))
 def test_empty_artifact_should_satisfy_nothing():
     result = P.evaluate("", {}, [], [])
     claimed = [c["control_id"] for c in result["soc2_controls"] if _claims_satisfied(c)]
@@ -78,9 +75,6 @@ def test_empty_artifact_should_satisfy_nothing():
         len(claimed), len(result["soc2_controls"]), claimed)
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "BUG (H2): a control reports satisfied with no evidence_source. "
-    "Absence of evidence is serialized as compliance."))
 def test_no_control_should_claim_satisfied_without_evidence():
     for artifact in ("", "def add(a, b): return a + b", "eval(input())"):
         for c in P.evaluate(artifact, {}, [], [])["soc2_controls"]:
@@ -90,17 +84,11 @@ def test_no_control_should_claim_satisfied_without_evidence():
                     % (artifact[:24], c["control_id"]))
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "BUG: satisfaction is binary, so 'not violated' and 'not checked' are "
-    "indistinguishable on the wire."))
 def test_status_should_be_tri_state():
     for c in P.evaluate("", {}, [], [])["soc2_controls"]:
         assert c.get("status") in ("satisfied", "violated", "unevaluated"), c
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "BUG: policy_judge cannot express that a check ran and passed, so "
-    "'satisfied' can never be earned -- only defaulted into."))
 def test_a_check_should_be_able_to_establish_satisfaction():
     coverage = {"CC6.1": "judge_engine/v1/structural_judge.py::rule_tenant_scope"}
     controls = _by_id(P.evaluate("ok", {}, [], [], coverage=coverage))

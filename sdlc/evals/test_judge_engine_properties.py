@@ -38,17 +38,20 @@ def test_policy_judge_ignores_the_artifact_entirely():
     assert a == b
 
 
-def test_all_soc2_controls_default_to_satisfied():
-    """No violations in => every control attested satisfied, for any artifact."""
+def test_no_soc2_control_defaults_to_satisfied():
+    """W1: inverted. This test formerly asserted the D3 bug as correct
+    behaviour -- `all(c["satisfied"])` on an empty artifact -- and would have
+    gone red the moment anyone fixed it. Absence of evidence is not compliance.
+    """
     out = policy_judge.evaluate("", {}, [], [])
-    assert all(c["satisfied"] for c in out["soc2_controls"])
+    assert not any(c["satisfied"] for c in out["soc2_controls"])
     assert len(out["soc2_controls"]) > 1
 
 
-@pytest.mark.xfail(strict=True,
-                   reason="BUG: unevaluated controls are reported satisfied; absence of evidence is not compliance")
-def test_unevaluated_controls_should_not_be_satisfied():
+def test_unevaluated_controls_are_not_satisfied():
+    """W1: was xfail(strict=True). Now a plain assertion."""
     out = policy_judge.evaluate("", {}, [], [])
+    assert all(c["status"] == "unevaluated" for c in out["soc2_controls"])
     assert not all(c["satisfied"] for c in out["soc2_controls"])
 
 
