@@ -200,3 +200,39 @@ Independent verification requires an asymmetric signing version (`ed25519-v1`),
 which exists in the implementation and is not the default as of 1.0.2.
 
 This erratum does not modify TRS-1 v1.0.0, which is frozen.
+
+## Errata - 2026-08-23
+
+E-2 (§12, SOC2 Control Mappings; and §1, Guarantees). "Receipts embed SOC2 Trust
+Services Criteria control mappings."
+
+Correction: the mapping is produced by three static pattern checks in
+judge_engine/v1/structural_judge.py (25 lines) — a regular expression matching
+credential assignment, which names CC6.1 and CC6.2; a substring test for the
+absence of try/except in artifacts longer than 200 characters, which names
+CC7.1; and a substring test for `def` without `->`, which names CC8.1. There is
+no fourth check.
+
+Section 12 and the project README both list CC6.7. No implementation has emitted
+CC6.7. CC6.2 is emitted on every receipt and is listed in neither document.
+
+CC7.2 is listed as covered. No rule maps to it, so it cannot be reported
+violated. This is pinned as a test:
+tests/test_policy_judge_soc2_claims.py::test_cc7_2_is_reachable_by_no_rule
+
+Until 2026-08-23, a control that no check had named was reported `satisfied`.
+An empty artifact therefore produced a signed receipt attesting 5 of 5 controls
+satisfied. As of commit 619231b the policy judge is tri-state — a control is
+`satisfied` only when a named check established it, `violated` when a check
+failed, and otherwise `unevaluated` with the reason recorded on the receipt. An
+empty artifact now attests 0 of 5.
+
+Not corrected by the above, and stated here so it is not inferred away: an empty
+artifact still classifies PASS, because the composite score is computed
+independently of the control mapping. That is a separate defect with a separate
+work order.
+
+A receipt records which criteria three pattern checks name. It is not an audit,
+it is not an attestation, and it is not evidence of compliance.
+
+This erratum does not modify TRS-1 v1.0.0, which is frozen.
