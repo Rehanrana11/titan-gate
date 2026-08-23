@@ -1,3 +1,8 @@
 {"id": 1, "date": "2026-08-17", "question": "how many tests does pytest report at repo ROOT, not tests/?", "prediction": "851", "actual": "858 collected: 1 failed, 856 passed, 1 skipped", "surprised": true}
-{"id": 2, "date": "2026-08-17", "question": "is the citation_domains discard deliberate or accidental?", "prediction": "deliberate", "actual": "", "surprised": null}
-{"id": 3, "date": "2026-08-17", "question": "titan-gate passed-count after removing the aivis tests?", "prediction": "848", "actual": "<the number>", "surprised": true}
+{"id": 2, "date": "2026-08-17", "question": "is the citation_domains discard deliberate or accidental?", "prediction": "deliberate", "actual": "deliberate", "surprised": false}
+{"id": 3, "date": "2026-08-17", "question": "titan-gate passed-count after removing the aivis tests?", "prediction": "848", "actual": "849", "surprised": true}
+{"id": 4, "date": "2026-08-17", "question": "does parse_success return True when parse_errors is non-empty?", "prediction": "yes", "actual": "yes", "surprised": false}
+{"id": 5, "date": "2026-08-17", "question": "how many receipts exist with a real external counterparty?", "prediction": "0", "actual": "0", "surprised": false}
+{"id": 6, "date": "2026-08-17", "question": "will structural_judge distinguish a+b from a-b?", "prediction": "no", "actual": "no", "surprised": false}
+{"id": 7, "date": "2026-08-17", "question": "empty artifact: verdict, composite, and how many soc2 controls satisfied?", "prediction": "PASS, 0.88, all", "actual": "", "surprised": null}
+{"id": 8, "date": "2026-08-17", "question": "how many distinct composite scores across D4's 10 inputs?", "prediction": "4", "actual": "", "surprised": null}

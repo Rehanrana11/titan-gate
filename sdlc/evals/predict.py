@@ -74,6 +74,8 @@ def cmd_record(args):
     r = hit[0]
     if not str(r.get("prediction", "")).strip():
         sys.exit(f"entry #{args.id} has no prediction; you cannot record an actual against nothing")
+    if args.actual.strip().startswith("<") and args.actual.strip().endswith(">"):
+        sys.exit(f"refusing placeholder actual {args.actual!r}: paste the real value, not the template")
     r["actual"] = args.actual
     if args.surprised is None:
         r["surprised"] = str(r["prediction"]).strip().lower() != str(args.actual).strip().lower()
